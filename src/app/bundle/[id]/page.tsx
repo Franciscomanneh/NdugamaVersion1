@@ -1,17 +1,32 @@
 "use client";
 
-import React, { useState, use } from 'react';
-import { ChevronLeft, Plus, Trash2, ShoppingBag, Settings2 } from 'lucide-react';
-import Link from 'next/link';
+import React, { useState, use, useMemo } from 'react';
+import { ChevronLeft, Plus, Trash2, ShoppingBag, Settings2, Minus, History, UtensilsCrossed } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { bundles } from '@/data/mock';
 import { notFound } from 'next/navigation';
+import { useAppContext } from '@/context/AppContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function BundleDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
+  const { addToCart } = useAppContext();
+
   const bundle = bundles.find(b => b.id === id);
-  const [ingredients, setIngredients] = useState(bundle?.ingredients.map(ing => ({ name: ing, active: true })) || []);
+
+  const [ingredients, setIngredients] = useState(
+    bundle?.ingredients.map(ing => ({ ...ing, active: true })) || []
+  );
+  const [added, setAdded] = useState(false);
 
   if (!bundle) notFound();
+
+  const currentTotal = useMemo(() => {
+    return ingredients.reduce((acc, ing) => {
+      return acc + (ing.active ? ing.pricePerUnit * ing.amount : 0);
+    }, 0);
+  }, [ingredients]);
 
   const toggleIngredient = (name: string) => {
     setIngredients(prev => prev.map(ing =>
@@ -19,81 +34,164 @@ export default function BundleDetailsPage({ params }: { params: Promise<{ id: st
     ));
   };
 
+  const updateQuantity = (name: string, delta: number) => {
+    setIngredients(prev => prev.map(ing => {
+      if (ing.name === name) {
+        const newAmount = Math.max(0.5, ing.amount + delta);
+        return { ...ing, amount: newAmount, active: true };
+      }
+      return ing;
+    }));
+  };
+
+  const handleAddToCart = () => {
+    const customizedIngredients = ingredients.filter(i => i.active);
+    addToCart({ ...bundle, price: currentTotal }, 'bundle', 1, customizedIngredients);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  };
+
   return (
-    <div className="pb-24">
+    <div className="bg-white min-h-screen pb-32">
       {/* Header */}
-      <div className="relative h-[300px] w-full">
+      <div className="relative h-[300px] w-full shadow-lg">
         <img src={bundle.image} alt={bundle.name} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        <Link href="/market" className="absolute top-6 left-6 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <button
+          onClick={() => router.back()}
+          className="absolute top-6 left-6 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white active:scale-90 transition-transform"
+        >
           <ChevronLeft size={20} />
-        </Link>
+        </button>
         <div className="absolute bottom-6 left-6 right-6">
-          <span className="bg-accent text-white text-[10px] font-black uppercase px-2 py-1 rounded mb-2 inline-block">Recipe Bundle</span>
-          <h1 className="text-3xl font-black text-white">{bundle.name}</h1>
+          <span className="bg-orange-500 text-white text-[10px] font-black uppercase px-3 py-1 rounded-full mb-2 inline-block shadow-lg">Recipe Bundle</span>
+          <h1 className="text-3xl font-black text-white drop-shadow-md">{bundle.name}</h1>
         </div>
       </div>
 
-      <div className="px-6 py-8">
-        <div className="flex justify-between items-center mb-8">
+      <main className="px-6 py-8 flex flex-col gap-8">
+        <section className="flex justify-between items-center bg-gray-50 p-6 rounded-[32px] border border-gray-100">
           <div>
-            <p className="text-gray-400 text-sm font-medium">Total Price</p>
-            <p className="text-3xl font-black text-primary">D{bundle.price}</p>
+            <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Total Price</p>
+            <p className="text-3xl font-black text-primary">D{currentTotal.toFixed(0)}</p>
           </div>
-          <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-2xl">
-            <Settings2 size={16} className="text-gray-500" />
-            <span className="text-sm font-bold text-gray-700">Customizable</span>
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-100">
+              <Settings2 size={14} className="text-primary" />
+              <span className="text-[10px] font-bold text-gray-700 uppercase tracking-tight">Customizable</span>
+            </div>
+            <p className="text-[10px] text-gray-400 italic">Adjust quantities below</p>
           </div>
-        </div>
+        </section>
 
-        <div className="mb-8">
-          <h3 className="text-lg font-bold mb-4 flex justify-between items-center">
-            Ingredients
+        <section className="flex flex-col gap-3">
+          <div className="flex items-center gap-2 text-primary">
+            <UtensilsCrossed size={18} />
+            <h3 className="font-bold">Cooking Description</h3>
+          </div>
+          <p className="text-sm text-gray-600 leading-relaxed bg-beige/30 p-4 rounded-2xl border border-beige/50">
+            {bundle.cookingDescription}
+          </p>
+        </section>
+
+        <section>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-bold">Ingredients</h3>
             <span className="text-xs font-medium text-gray-400">{ingredients.filter(i => i.active).length} items included</span>
-          </h3>
-          <div className="flex flex-col gap-3">
+          </div>
+          <div className="flex flex-col gap-4">
             {ingredients.map((ing) => (
               <div
                 key={ing.name}
-                className={`p-4 rounded-2xl border flex justify-between items-center transition-all ${
+                className={`p-4 rounded-3xl border-2 transition-all flex flex-col gap-3 ${
                   ing.active ? 'bg-white border-gray-100 shadow-soft' : 'bg-gray-50 border-transparent opacity-50'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <div className={`w-2 h-2 rounded-full ${ing.active ? 'bg-primary' : 'bg-gray-300'}`} />
-                  <span className={`font-bold ${ing.active ? 'text-gray-800' : 'text-gray-400 line-through'}`}>
-                    {ing.name}
-                  </span>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full ${ing.active ? 'bg-primary shadow-[0_0_8px_rgba(30,142,62,0.4)]' : 'bg-gray-300'}`} />
+                    <span className={`font-bold text-sm ${ing.active ? 'text-gray-800' : 'text-gray-400 line-through'}`}>
+                      {ing.name}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => toggleIngredient(ing.name)}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm ${
+                      ing.active ? 'bg-red-50 text-red-500 hover:bg-red-100' : 'bg-green-50 text-primary hover:bg-green-100'
+                    }`}
+                  >
+                    {ing.active ? <Trash2 size={16} /> : <Plus size={16} />}
+                  </button>
                 </div>
-                <button
-                  onClick={() => toggleIngredient(ing.name)}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                    ing.active ? 'bg-red-50 text-red-500' : 'bg-green-50 text-primary'
-                  }`}
-                >
-                  {ing.active ? <Trash2 size={16} /> : <Plus size={16} />}
-                </button>
+
+                {ing.active && (
+                  <div className="flex justify-between items-center pt-2 border-t border-gray-50">
+                    <span className="text-xs text-gray-400">{ing.amount} {ing.unit}</span>
+                    <div className="flex items-center gap-4 bg-gray-50 px-2 py-1 rounded-full border border-gray-100">
+                      <button
+                        onClick={() => updateQuantity(ing.name, -0.5)}
+                        className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-gray-600 shadow-sm active:scale-90"
+                      >
+                        <Minus size={12} />
+                      </button>
+                      <span className="text-xs font-bold w-6 text-center">{ing.amount}</span>
+                      <button
+                        onClick={() => updateQuantity(ing.name, 0.5)}
+                        className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center shadow-sm active:scale-90"
+                      >
+                        <Plus size={12} />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
-        </div>
+        </section>
 
-        <div className="p-6 rounded-3xl bg-beige border border-yellow-100 mb-8">
-          <h4 className="font-bold text-sm mb-2">Cooking Instructions</h4>
-          <p className="text-xs text-gray-600 leading-relaxed">
-            Scan the QR code on the delivery package to get the step-by-step video recipe for this {bundle.name}!
+        <section className="flex flex-col gap-3 mb-8">
+          <div className="flex items-center gap-2 text-primary">
+            <History size={18} />
+            <h3 className="font-bold">Dugama Promise</h3>
+          </div>
+          <p className="text-xs text-gray-500 leading-relaxed italic">
+            Ingredients are sourced directly from gardens on the morning of delivery to ensure your {bundle.name} tastes authentic and fresh.
           </p>
-        </div>
-      </div>
+        </section>
+      </main>
 
       {/* Bottom Action */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] p-6 bg-white/80 backdrop-blur-lg border-t border-gray-100 z-50">
-        <div className="flex gap-4">
-          <button className="flex-1 py-4 bg-primary text-white rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl active:scale-[0.98] transition-all">
-            <ShoppingBag size={20} />
-            Add Bundle
-          </button>
-        </div>
+      <div className="fixed bottom-[80px] left-1/2 -translate-x-1/2 w-full max-w-[480px] px-6 py-4 bg-white/80 backdrop-blur-lg border-t border-gray-100 z-40">
+        <button
+          onClick={handleAddToCart}
+          className={`w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl active:scale-[0.98] transition-all ${
+            added ? 'bg-green-600 shadow-green-500/20' : 'bg-primary shadow-primary/20'
+          } text-white`}
+        >
+          <AnimatePresence mode="wait">
+            {added ? (
+              <motion.span
+                key="added"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                Bundle Added!
+              </motion.span>
+            ) : (
+              <motion.span
+                key="add"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="flex items-center gap-2"
+              >
+                <ShoppingBag size={20} />
+                Add to Cart • D{currentTotal.toFixed(0)}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </button>
       </div>
     </div>
   );

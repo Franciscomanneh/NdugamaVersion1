@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { BottomNav } from "@/components/BottomNav";
+import { AppProvider } from "@/context/AppContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,10 +19,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="mobile-container pb-20">
-          {children}
-          <BottomNav />
-        </div>
+        <AppProvider>
+          <div className="mobile-container pb-20">
+            {children}
+            <BottomNav />
+          </div>
+        </AppProvider>
       </body>
     </html>
   );
