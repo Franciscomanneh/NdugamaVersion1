@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { BottomNav } from "@/components/BottomNav";
 import { AppProvider } from "@/context/AppContext";
+import { Onboarding } from "@/components/Onboarding";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,6 +21,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AppProvider>
+          <Onboarding />
           <div className="mobile-container pb-20">
             {children}
             <BottomNav />

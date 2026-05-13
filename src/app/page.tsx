@@ -6,10 +6,12 @@ import { Search, ChevronRight, Plus, MapPin, Heart } from 'lucide-react';
 import { categories, gardeners, bundles, products } from '@/data/mock';
 import { useAppContext } from '@/context/AppContext';
 import { motion } from 'framer-motion';
+import { DonationModal } from '@/components/DonationModal';
 
 export default function HomePage() {
   const { location, setLocation, addToCart, favorites, toggleFavorite } = useAppContext();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
 
   const locations = ['Banjul', 'Serrekunda', 'Brikama', 'Bakau'];
 
@@ -261,15 +263,28 @@ export default function HomePage() {
           <div className="w-2/3 z-10">
             <h3 className="text-white font-bold text-xl mb-2">Support Local Farmers</h3>
             <p className="text-white/80 text-xs mb-4">Your purchase helps empower local garden women communities.</p>
-            <Link href="/support" className="bg-white text-primary px-6 py-2.5 rounded-full text-sm font-bold shadow-md active:scale-95 transition-transform inline-block">
-              Learn More
-            </Link>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setIsDonationModalOpen(true)}
+                className="bg-white text-primary px-6 py-2.5 rounded-full text-sm font-bold shadow-md active:scale-95 transition-transform"
+              >
+                Donate
+              </button>
+              <Link href="/support" className="bg-primary/20 text-white border border-white/20 px-6 py-2.5 rounded-full text-sm font-bold backdrop-blur-sm active:scale-95 transition-transform inline-block">
+                Learn More
+              </Link>
+            </div>
           </div>
           <div className="absolute right-0 bottom-0 w-1/2 h-full opacity-20 pointer-events-none">
             <Plus className="w-full h-full rotate-45" />
           </div>
         </div>
       </section>
+
+      <DonationModal
+        isOpen={isDonationModalOpen}
+        onClose={() => setIsDonationModalOpen(false)}
+      />
     </div>
   );
 }

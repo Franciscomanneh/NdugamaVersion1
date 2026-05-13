@@ -12,16 +12,37 @@ export default function LoginPage() {
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [isNewUser, setIsNewUser] = useState(false);
+  const [isAdminLogin, setIsAdminLogin] = useState(false);
+  const [password, setPassword] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate login
-    const userData = {
+
+    if (isAdminLogin) {
+      if (phone === 'admin' && password === 'admin123') {
+        setUser({
+          id: 'admin-id',
+          name: 'Dugama Admin',
+          phone: 'admin',
+          location: 'Banjul',
+          role: 'admin'
+        });
+        router.push('/admin');
+        return;
+      } else {
+        alert('Invalid admin credentials');
+        return;
+      }
+    }
+
+    // Simulate regular user login
+    const userData: any = {
       id: Math.random().toString(36).substr(2, 9),
       name: name || 'Dugama User',
       phone: phone,
       location: 'Serrekunda',
-      image: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?auto=format&fit=crop&q=80&w=100'
+      image: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?auto=format&fit=crop&q=80&w=100',
+      role: 'user'
     };
     setUser(userData);
     router.push('/profile');
@@ -62,29 +83,55 @@ export default function LoginPage() {
             <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
               required
-              type="tel"
-              placeholder="Phone Number"
+              type={isAdminLogin ? "text" : "tel"}
+              placeholder={isAdminLogin ? "Admin Username" : "Phone Number"}
               className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-6 text-sm focus:ring-2 focus:ring-primary/20"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
           </div>
 
+          {isAdminLogin && (
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                required
+                type="password"
+                placeholder="Admin Password"
+                className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-6 text-sm focus:ring-2 focus:ring-primary/20"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+          )}
+
           <button
             type="submit"
             className="w-full py-5 bg-primary text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 mt-4"
           >
             <LogIn size={20} />
-            {isNewUser ? 'Create Account' : 'Sign In'}
+            {isAdminLogin ? 'Admin Login' : (isNewUser ? 'Create Account' : 'Sign In')}
           </button>
         </form>
 
-        <div className="mt-8 text-center">
+        <div className="mt-8 text-center flex flex-col gap-4">
           <button
-            onClick={() => setIsNewUser(!isNewUser)}
+            onClick={() => {
+              setIsNewUser(!isNewUser);
+              setIsAdminLogin(false);
+            }}
             className="text-sm font-bold text-gray-400"
           >
             {isNewUser ? 'Already have an account? Sign In' : "Don't have an account? Create one"}
+          </button>
+          <button
+            onClick={() => {
+              setIsAdminLogin(!isAdminLogin);
+              setIsNewUser(false);
+            }}
+            className="text-sm font-bold text-primary"
+          >
+            {isAdminLogin ? 'Regular User Login' : 'Admin Login'}
           </button>
         </div>
       </main>

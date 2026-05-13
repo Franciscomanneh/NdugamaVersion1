@@ -19,6 +19,7 @@ export interface Order {
   total: number;
   status: 'Order Received' | 'Shopping In Progress' | 'Out For Delivery' | 'Delivered';
   items: CartItem[];
+  deliveryZone: string;
   completedAt?: string;
 }
 
@@ -28,6 +29,8 @@ export interface User {
   phone: string;
   location: string;
   image?: string;
+  role: 'user' | 'admin' | 'seller';
+  isApprovedSeller?: boolean;
 }
 
 interface Address {
@@ -67,6 +70,7 @@ interface AppContextType {
   orders: Order[];
   addOrder: (order: Order) => void;
   completeOrder: (id: string) => void;
+  markOrderCompleted: (id: string) => void;
   updateOrderStatus: (id: string, status: Order['status']) => void;
 
   // Profile data
@@ -176,11 +180,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addOrder = (order: Order) => setOrders(prev => [order, ...prev]);
 
   const completeOrder = (id: string) => {
-    setOrders(prev => prev.map(o => o.id === id ? {
-      ...o,
-      status: 'Delivered',
-      completedAt: new Date().toLocaleString()
-    } : o));
+    setOrders(prev => {
+      const newOrders = prev.map(o => o.id === id ? {
+        ...o,
+        status: 'Delivered' as const,
+      } : o);
+      localStorage.setItem('dugama_orders', JSON.stringify(newOrders));
+      return newOrders;
+    });
+  };
+
+  const markOrderCompleted = (id: string) => {
+    setOrders(prev => {
+      const newOrders = prev.map(o => o.id === id ? {
+        ...o,
+        status: 'Delivered' as const,
+        completedAt: new Date().toLocaleString()
+      } : o);
+      localStorage.setItem('dugama_orders', JSON.stringify(newOrders));
+      return newOrders;
+    });
   };
 
   const updateOrderStatus = (id: string, status: Order['status']) => {
@@ -202,7 +221,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       user, setUser, isLoggedIn: !!user, logout,
       cart, addToCart, removeFromCart, updateQuantity, clearCart,
       location, setLocation,
-      orders, addOrder, completeOrder, updateOrderStatus,
+      orders, addOrder, completeOrder, markOrderCompleted, updateOrderStatus,
       favorites, toggleFavorite,
       addresses, addAddress,
       paymentMethods, setDefaultPayment

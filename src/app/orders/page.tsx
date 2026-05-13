@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function OrdersPage() {
   const router = useRouter();
-  const { orders, completeOrder } = useAppContext();
+  const { orders, markOrderCompleted } = useAppContext();
   const [activeTab, setActiveTab] = useState<'ongoing' | 'completed'>('ongoing');
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
 
@@ -123,13 +123,13 @@ export default function OrdersPage() {
                       {activeTab === 'ongoing' ? (
                         <>
                           <button
-                            onClick={() => setSelectedOrder(selectedOrder === order.id ? null : order.id)}
+                            onClick={() => router.push(`/orders/track/${order.id}`)}
                             className="w-full py-4 bg-primary text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-2 active:scale-[0.98]"
                           >
-                            <Truck size={16} /> {selectedOrder === order.id ? "Hide Tracking" : "Track Delivery"}
+                            <Truck size={16} /> Track Delivery
                           </button>
                           <button
-                            onClick={() => completeOrder(order.id)}
+                            onClick={() => markOrderCompleted(order.id)}
                             className="w-full py-2 text-primary font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-green-50 rounded-xl transition-colors"
                           >
                             <Check size={14} /> Mark as Completed

@@ -52,11 +52,13 @@ export default function ProfilePage() {
     { label: 'My Orders', icon: ClipboardList, href: '/orders', color: 'text-blue-500', bg: 'bg-blue-50' },
     { label: 'My Addresses', icon: MapPin, href: '/profile/addresses', color: 'text-green-500', bg: 'bg-green-50' },
     { label: 'Payment Methods', icon: CreditCard, href: '/profile/payment-methods', color: 'text-purple-500', bg: 'bg-purple-50' },
-    { label: 'Become a Seller', icon: Store, href: '/gardener-application', color: 'text-primary', bg: 'bg-green-50' },
+    { label: 'Become a Seller', icon: Store, href: '/gardener-application', color: 'text-primary', bg: 'bg-green-50', show: user?.role === 'user' },
+    { label: 'Seller Dashboard', icon: Store, href: '/profile/seller-dashboard', color: 'text-primary', bg: 'bg-green-50', show: user?.role === 'seller' || user?.isApprovedSeller },
+    { label: 'Admin Dashboard', icon: ShieldCheck, href: '/admin', color: 'text-orange-500', bg: 'bg-orange-50', show: user?.role === 'admin' },
     { label: 'Settings', icon: Settings, href: '/profile/settings', color: 'text-gray-500', bg: 'bg-gray-50' },
     { label: 'Privacy Policy', icon: ShieldCheck, href: '/profile/privacy', color: 'text-orange-500', bg: 'bg-orange-50' },
     { label: 'Help & Support', icon: HelpCircle, href: '/profile/help', color: 'text-red-500', bg: 'bg-red-50' },
-  ];
+  ].filter(item => item.show !== false);
 
   const pendingOrders = orders.filter(o => o.status !== 'Delivered').length;
   const totalSpent = orders.reduce((acc, o) => acc + o.total, 0);

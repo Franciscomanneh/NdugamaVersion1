@@ -42,7 +42,8 @@ export default function CheckoutPage() {
       date: new Date().toLocaleDateString(),
       total: total,
       status: 'Order Received' as const,
-      items: [...cart]
+      items: [...cart],
+      deliveryZone: location
     };
 
     setTimeout(() => {
