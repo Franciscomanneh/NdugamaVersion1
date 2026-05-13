@@ -13,6 +13,15 @@ export default function HomePage() {
 
   const locations = ['Banjul', 'Serrekunda', 'Brikama', 'Bakau'];
 
+  const filteredBundles = bundles.filter(b =>
+    b.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredProducts = products.filter(p =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="flex flex-col gap-8 pb-10">
       {/* Header */}
@@ -83,25 +92,27 @@ export default function HomePage() {
       </section>
 
       {/* Categories */}
-      <section>
-        <div className="flex items-center justify-between px-6 mb-4">
-          <h3 className="text-lg font-bold">Categories</h3>
-        </div>
-        <div className="flex gap-4 overflow-x-auto px-6 hide-scrollbar pb-2">
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              href={`/market?category=${cat.name}`}
-              className="flex flex-col items-center gap-2 min-w-[70px] active:scale-90 transition-transform"
-            >
-              <div className="w-16 h-16 rounded-2xl bg-beige flex items-center justify-center text-2xl shadow-soft">
-                {cat.icon}
-              </div>
-              <span className="text-xs font-medium text-gray-600">{cat.name}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {!searchQuery && (
+        <section>
+          <div className="flex items-center justify-between px-6 mb-4">
+            <h3 className="text-lg font-bold">Categories</h3>
+          </div>
+          <div className="flex gap-4 overflow-x-auto px-6 hide-scrollbar pb-2">
+            {categories.map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/market?category=${cat.name}`}
+                className="flex flex-col items-center gap-2 min-w-[70px] active:scale-90 transition-transform"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-beige flex items-center justify-center text-2xl shadow-soft">
+                  {cat.icon}
+                </div>
+                <span className="text-xs font-medium text-gray-600">{cat.name}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Featured Gardeners */}
       <section className="px-6">
@@ -141,6 +152,7 @@ export default function HomePage() {
       </section>
 
       {/* Recipe Bundles */}
+      {(filteredBundles.length > 0) && (
       <section>
         <div className="flex items-center justify-between px-6 mb-4">
           <h3 className="text-lg font-bold text-accent">Dugama Recipe Bundles</h3>
@@ -149,7 +161,7 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="flex gap-4 overflow-x-auto px-6 hide-scrollbar pb-4">
-          {bundles.map((bundle) => (
+          {filteredBundles.map((bundle) => (
             <div key={bundle.id} className="min-w-[280px] rounded-3xl overflow-hidden bg-white border border-gray-100 shadow-soft relative group">
               <Link href={`/bundle/${bundle.id}`}>
                 <img src={bundle.image} alt={bundle.name} className="w-full h-40 object-cover" />
@@ -180,15 +192,17 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+      )}
 
       {/* Market Preview */}
+      {(filteredProducts.length > 0) && (
       <section className="px-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold">Market Fresh</h3>
-          <Link href="/market" className="text-primary text-sm font-semibold">View All</Link>
+          <h3 className="text-lg font-bold">{searchQuery ? 'Search Results' : 'Market Fresh'}</h3>
+          {!searchQuery && <Link href="/market" className="text-primary text-sm font-semibold">View All</Link>}
         </div>
         <div className="grid grid-cols-2 gap-4">
-          {products.slice(0, 4).map((p) => (
+          {(searchQuery ? filteredProducts : filteredProducts.slice(0, 4)).map((p) => (
             <div key={p.id} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-soft group">
               <div className="relative h-32 w-full overflow-hidden">
                 <Link href={`/product/${p.id}`}>
@@ -217,6 +231,7 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+      )}
 
       {/* For Everyone Section */}
       <section className="px-6 grid grid-cols-3 gap-3">
@@ -226,13 +241,13 @@ export default function HomePage() {
           </div>
           <span className="text-[11px] font-bold text-primary text-center">For Buyers</span>
         </Link>
-        <Link href="/profile/become-seller" className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-green-50 border border-green-100 active:bg-green-100 transition-colors">
+        <Link href="/gardener-application" className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-green-50 border border-green-100 active:bg-green-100 transition-colors">
           <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
             <Plus size={16} />
           </div>
           <span className="text-[11px] font-bold text-primary text-center">For Gardeners</span>
         </Link>
-        <Link href="/gardeners" className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-green-50 border border-green-100 active:bg-green-100 transition-colors">
+        <Link href="/vendor-info" className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-green-50 border border-green-100 active:bg-green-100 transition-colors">
           <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
             <Plus size={16} />
           </div>

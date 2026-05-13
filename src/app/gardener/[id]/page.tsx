@@ -1,14 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, MapPin, MessageCircle, ShoppingBag, Info, Phone } from 'lucide-react';
 import { gardeners } from '@/data/mock';
 import { motion } from 'framer-motion';
 
-export default function GardenerDetailPage({ params }: { params: { id: string } }) {
+export default function GardenerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
-  const gardener = gardeners.find(g => g.id === params.id);
+  const gardener = gardeners.find(g => g.id === id);
 
   if (!gardener) return <div>Gardener not found</div>;
 

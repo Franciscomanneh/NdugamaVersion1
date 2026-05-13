@@ -37,7 +37,8 @@ function MarketContent() {
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
       const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
-      const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            p.category.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesPrice = p.price >= priceRange[0] && p.price <= priceRange[1];
       return matchesCategory && matchesSearch && matchesPrice;
     }).sort((a, b) => {
@@ -125,23 +126,25 @@ function MarketContent() {
           </button>
         </div>
 
-        {/* Categories Bar (Only show for products or as a general filter) */}
-        <div className="flex gap-2 overflow-x-auto hide-scrollbar -mx-6 px-6">
-          {['All', ...categories.map(c => c.name)].map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={cn(
-                "whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold border-2 transition-all active:scale-95",
-                selectedCategory === cat
-                  ? "bg-primary border-primary text-white shadow-md shadow-primary/20"
-                  : "bg-white border-gray-100 text-gray-500 hover:border-gray-200"
-              )}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+        {/* Categories Bar (Only show for products) */}
+        {activeTab === 'products' && (
+          <div className="flex gap-2 overflow-x-auto hide-scrollbar -mx-6 px-6">
+            {['All', ...categories.map(c => c.name)].map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={cn(
+                  "whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold border-2 transition-all active:scale-95",
+                  selectedCategory === cat
+                    ? "bg-primary border-primary text-white shadow-md shadow-primary/20"
+                    : "bg-white border-gray-100 text-gray-500 hover:border-gray-200"
+                )}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="px-6 py-6">

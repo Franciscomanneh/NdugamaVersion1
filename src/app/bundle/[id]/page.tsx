@@ -16,9 +16,10 @@ export default function BundleDetailsPage({ params }: { params: Promise<{ id: st
   const bundle = bundles.find(b => b.id === id);
 
   const [ingredients, setIngredients] = useState(
-    bundle?.ingredients.map(ing => ({ ...ing, active: true })) || []
+    bundle?.ingredients.map(ing => ({ ...ing, active: true, isCustom: false })) || []
   );
   const [added, setAdded] = useState(false);
+  const [newIngredient, setNewIngredient] = useState('');
 
   if (!bundle) notFound();
 
@@ -49,6 +50,20 @@ export default function BundleDetailsPage({ params }: { params: Promise<{ id: st
     addToCart({ ...bundle, price: currentTotal }, 'bundle', 1, customizedIngredients);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+  };
+
+  const addCustomIngredient = () => {
+    if (!newIngredient.trim()) return;
+    const newItem = {
+      name: newIngredient.trim(),
+      amount: 1,
+      unit: 'unit',
+      pricePerUnit: 25, // Default price for custom ingredients
+      active: true,
+      isCustom: true
+    };
+    setIngredients(prev => [...prev, newItem]);
+    setNewIngredient('');
   };
 
   return (
@@ -99,6 +114,23 @@ export default function BundleDetailsPage({ params }: { params: Promise<{ id: st
             <h3 className="text-lg font-bold">Ingredients</h3>
             <span className="text-xs font-medium text-gray-400">{ingredients.filter(i => i.active).length} items included</span>
           </div>
+
+          <div className="flex gap-2 mb-6">
+            <input
+              type="text"
+              placeholder="Add extra ingredient..."
+              value={newIngredient}
+              onChange={(e) => setNewIngredient(e.target.value)}
+              className="flex-1 bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all"
+            />
+            <button
+              onClick={addCustomIngredient}
+              className="px-6 bg-primary text-white font-bold rounded-2xl text-xs active:scale-95 transition-all shadow-md shadow-primary/20"
+            >
+              Add
+            </button>
+          </div>
+
           <div className="flex flex-col gap-4">
             {ingredients.map((ing) => (
               <div

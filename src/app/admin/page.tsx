@@ -1,143 +1,102 @@
-"use client";
+'use client';
 
-import React, { useState } from 'react';
-import {
-  LayoutDashboard,
-  ShoppingBag,
-  Users,
-  ClipboardList,
-  Plus,
-  MoreVertical,
-  ArrowUpRight,
-  Search
-} from 'lucide-react';
-import { products, bundles } from '@/data/mock';
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { ChevronLeft, ShieldAlert, CheckCircle2, Clock, Truck, Package, ShoppingBag } from 'lucide-react';
+import { useAppContext } from '@/context/AppContext';
 import { cn } from '@/lib/utils';
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'orders'>('overview');
+  const router = useRouter();
+  const { orders, updateOrderStatus } = useAppContext();
+
+  const statusOptions: ('Order Received' | 'Shopping In Progress' | 'Out For Delivery' | 'Delivered')[] = [
+    'Order Received',
+    'Shopping In Progress',
+    'Out For Delivery',
+    'Delivered'
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
-      {/* Admin Header */}
-      <header className="bg-white px-6 pt-12 pb-6 flex justify-between items-center shadow-sm">
-        <div>
-          <h1 className="text-2xl font-black text-gray-900">Admin Panel</h1>
-          <p className="text-xs font-bold text-primary uppercase tracking-widest">Dugama Marketplace</p>
+    <div className="bg-gray-50 min-h-screen pb-20">
+      <header className="bg-white px-6 pt-6 pb-4 flex items-center justify-between sticky top-0 z-40 border-b border-gray-100">
+        <div className="flex items-center gap-4">
+          <button onClick={() => router.push('/')} className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+            <ChevronLeft size={24} />
+          </button>
+          <h1 className="text-xl font-bold text-gray-800">Admin Panel</h1>
         </div>
-        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-          <Users size={20} className="text-gray-600" />
+        <div className="flex items-center gap-2 px-3 py-1 bg-red-50 text-red-500 rounded-full border border-red-100">
+          <ShieldAlert size={14} />
+          <span className="text-[10px] font-black uppercase tracking-widest">Simulator</span>
         </div>
       </header>
 
-      {/* Nav Tabs */}
-      <div className="flex bg-white px-6 border-b border-gray-100">
-        {[
-          { id: 'overview', icon: LayoutDashboard, label: 'Stats' },
-          { id: 'products', icon: ShoppingBag, label: 'Store' },
-          { id: 'orders', icon: ClipboardList, label: 'Sales' }
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className={cn(
-              "flex-1 py-4 flex flex-col items-center gap-1 transition-all border-b-2",
-              activeTab === tab.id ? "border-primary text-primary" : "border-transparent text-gray-400"
-            )}
-          >
-            <tab.icon size={20} />
-            <span className="text-[10px] font-bold uppercase">{tab.label}</span>
-          </button>
-        ))}
-      </div>
+      <main className="p-6 flex flex-col gap-8">
+        <section className="flex flex-col gap-4">
+          <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Live Order Management</h2>
 
-      <div className="p-6">
-        {activeTab === 'overview' && (
-          <div className="flex flex-col gap-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white p-6 rounded-3xl shadow-soft">
-                <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Daily Revenue</p>
-                <div className="flex items-end justify-between">
-                  <h3 className="text-xl font-black">D12,450</h3>
-                  <span className="text-xs font-bold text-green-500 flex items-center">
-                    +12% <ArrowUpRight size={12} />
-                  </span>
-                </div>
-              </div>
-              <div className="bg-white p-6 rounded-3xl shadow-soft">
-                <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Total Orders</p>
-                <div className="flex items-end justify-between">
-                  <h3 className="text-xl font-black">48</h3>
-                  <span className="text-xs font-bold text-primary">New</span>
-                </div>
-              </div>
+          {orders.length === 0 ? (
+            <div className="py-20 text-center flex flex-col items-center gap-4 bg-white rounded-[40px] border border-dashed border-gray-200">
+              <Package className="text-gray-200" size={48} />
+              <p className="text-gray-400 font-bold">No orders to manage yet.</p>
             </div>
-
-            <div className="bg-white p-6 rounded-3xl shadow-soft">
-              <h4 className="font-bold mb-4">Live Activity</h4>
-              <div className="flex flex-col gap-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center gap-4">
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    <div className="flex-1">
-                      <p className="text-xs font-bold">New Order #DUG-{8000 + i}</p>
-                      <p className="text-[10px] text-gray-400">2 minutes ago • Serrekunda</p>
+          ) : (
+            <div className="flex flex-col gap-6">
+              {orders.map((order) => (
+                <div key={order.id} className="bg-white rounded-[32px] p-6 border border-gray-100 shadow-soft">
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">{order.id}</span>
+                      <h3 className="font-black text-gray-800 tracking-tight">{order.date}</h3>
+                      <p className="text-xs text-gray-400 font-bold">Total: D{order.total.toFixed(0)}</p>
                     </div>
-                    <span className="text-xs font-black text-primary">D450</span>
+                    <div className="text-right">
+                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Status</p>
+                      <select
+                        value={order.status}
+                        onChange={(e) => updateOrderStatus(order.id, e.target.value as any)}
+                        className="bg-gray-50 border-none rounded-xl py-2 px-4 text-xs font-black text-primary focus:ring-2 focus:ring-primary/20 appearance-none pr-8"
+                        style={{ backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}
+                      >
+                        {statusOptions.map(opt => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
 
-        {activeTab === 'products' && (
-          <div className="flex flex-col gap-6">
-            <div className="flex gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                <input placeholder="Search inventory..." className="w-full bg-white border border-gray-100 rounded-xl py-2 pl-9 pr-4 text-xs font-bold" />
-              </div>
-              <button className="bg-primary text-white p-2 rounded-xl">
-                <Plus size={20} />
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-3">
-              {products.map((p) => (
-                <div key={p.id} className="bg-white p-3 rounded-2xl flex items-center gap-4 border border-gray-100 shadow-soft">
-                  <img src={p.image} className="w-12 h-12 rounded-xl object-cover" />
-                  <div className="flex-1">
-                    <h5 className="text-xs font-bold">{p.name}</h5>
-                    <p className="text-[10px] text-gray-400">Stock: 45 kg • D{p.price}/kg</p>
+                  <div className="flex flex-col gap-2 bg-gray-50 p-4 rounded-2xl mb-2">
+                    {order.items.map((item, i) => (
+                      <div key={i} className="flex justify-between text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
+                        <span>{item.quantity}x {item.name}</span>
+                        <span>D{item.price * item.quantity}</span>
+                      </div>
+                    ))}
                   </div>
-                  <button className="text-gray-400">
-                    <MoreVertical size={18} />
-                  </button>
+
+                  {order.completedAt && (
+                    <div className="mt-4 flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-xl border border-green-100">
+                      <CheckCircle2 size={14} />
+                      <span className="text-[10px] font-black uppercase">Buyer confirmed at {order.completedAt}</span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </section>
 
-        {activeTab === 'orders' && (
-          <div className="flex flex-col gap-4">
-            <h4 className="font-bold">Recent Transactions</h4>
-            {products.map((p, i) => (
-              <div key={i} className="bg-white p-4 rounded-2xl flex items-center justify-between border-l-4 border-l-primary shadow-soft">
-                <div>
-                  <p className="text-xs font-black">#DUG-782{i}</p>
-                  <p className="text-[10px] text-gray-400 font-medium">13 May 2024 • 10:2{i} AM</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-black text-primary">D{p.price * 5}</p>
-                  <p className="text-[10px] text-green-500 font-bold uppercase">Paid</p>
-                </div>
-              </div>
-            ))}
+        <section className="bg-primary/10 p-8 rounded-[40px] flex flex-col gap-4 border border-primary/10">
+          <div className="flex items-center gap-3 text-primary">
+            <ShieldAlert size={24} />
+            <h2 className="text-xl font-black">Admin Simulator</h2>
           </div>
-        )}
-      </div>
+          <p className="text-xs text-gray-500 leading-relaxed font-medium">
+            This panel simulates the internal Dugama Dashboard. Changing order statuses here will update the tracking view for the customer in real-time.
+          </p>
+        </section>
+      </main>
     </div>
   );
 }

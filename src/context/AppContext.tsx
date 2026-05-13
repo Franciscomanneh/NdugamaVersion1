@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, Bundle } from '@/data/mock';
 
-interface CartItem {
+export interface CartItem {
   id: string;
   name: string;
   price: number;
@@ -13,44 +13,95 @@ interface CartItem {
   ingredients?: any[]; // For bundles
 }
 
-interface Order {
+export interface Order {
   id: string;
   date: string;
   total: number;
   status: 'Order Received' | 'Shopping In Progress' | 'Out For Delivery' | 'Delivered';
   items: CartItem[];
+  completedAt?: string;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  phone: string;
+  location: string;
+  image?: string;
+}
+
+interface Address {
+  id: string;
+  label: string;
+  address: string;
+  isDefault: boolean;
+}
+
+interface PaymentMethod {
+  id: string;
+  type: 'Cash' | 'Wave' | 'AfriMoney' | 'QMoney';
+  isDefault: boolean;
 }
 
 interface AppContextType {
+  // Auth
+  user: User | null;
+  setUser: (user: User | null) => void;
+  isLoggedIn: boolean;
+  logout: () => void;
+
+  // Cart
   cart: CartItem[];
   addToCart: (item: Product | Bundle, type: 'product' | 'bundle', quantity?: number, customizedIngredients?: any[]) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, delta: number) => void;
   clearCart: () => void;
+
+  // Location & Preferences
   location: string;
   setLocation: (loc: string) => void;
+  favorites: string[];
+  toggleFavorite: (id: string) => void;
+
+  // Orders
   orders: Order[];
   addOrder: (order: Order) => void;
   completeOrder: (id: string) => void;
-  favorites: string[];
-  toggleFavorite: (id: string) => void;
+  updateOrderStatus: (id: string, status: Order['status']) => void;
+
+  // Profile data
+  addresses: Address[];
+  addAddress: (addr: Address) => void;
+  paymentMethods: PaymentMethod[];
+  setDefaultPayment: (id: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [location, setLocation] = useState('Serrekunda');
   const [orders, setOrders] = useState<Order[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [addresses, setAddresses] = useState<Address[]>([
+    { id: '1', label: 'Home', address: 'House 42, Kairaba Avenue', isDefault: true }
+  ]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
+    { id: '1', type: 'Cash', isDefault: true },
+    { id: '2', type: 'Wave', isDefault: false },
+    { id: '3', type: 'AfriMoney', isDefault: false },
+  ]);
 
   // Load from localStorage on mount
   useEffect(() => {
+    const savedUser = localStorage.getItem('dugama_user');
     const savedCart = localStorage.getItem('dugama_cart');
     const savedLocation = localStorage.getItem('dugama_location');
     const savedOrders = localStorage.getItem('dugama_orders');
     const savedFavorites = localStorage.getItem('dugama_favorites');
 
+    if (savedUser) setUser(JSON.parse(savedUser));
     if (savedCart) setCart(JSON.parse(savedCart));
     if (savedLocation) setLocation(savedLocation);
     if (savedOrders) setOrders(JSON.parse(savedOrders));
@@ -58,6 +109,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   // Save to localStorage
+  useEffect(() => {
+    if (user) localStorage.setItem('dugama_user', JSON.stringify(user));
+    else localStorage.removeItem('dugama_user');
+  }, [user]);
+
   useEffect(() => {
     localStorage.setItem('dugama_cart', JSON.stringify(cart));
   }, [cart]);
@@ -74,14 +130,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('dugama_favorites', JSON.stringify(favorites));
   }, [favorites]);
 
+  const logout = () => {
+    setUser(null);
+    // Maybe not clear cart on logout for better UX?
+  };
+
   const addToCart = (item: Product | Bundle, type: 'product' | 'bundle', quantity: number = 1, customizedIngredients?: any[]) => {
     setCart(prev => {
-      const existing = prev.find(i => i.id === item.id);
-      if (existing && type === 'product') {
-        return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + quantity } : i);
+      // For products, we check if it already exists to update quantity
+      if (type === 'product') {
+        const existing = prev.find(i => i.id === item.id && i.type === 'product');
+        if (existing) {
+          return prev.map(i => i.id === item.id && i.type === 'product' ? { ...i, quantity: i.quantity + quantity } : i);
+        }
       }
+      // For bundles, or new products, add new item
       return [...prev, {
-        id: item.id,
+        id: item.id + (type === 'bundle' ? '-' + Math.random().toString(36).substr(2, 5) : ''), // unique ID for customized bundles
         name: item.name,
         price: item.price,
         quantity,
@@ -111,19 +176,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addOrder = (order: Order) => setOrders(prev => [order, ...prev]);
 
   const completeOrder = (id: string) => {
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, status: 'Delivered' } : o));
+    setOrders(prev => prev.map(o => o.id === id ? {
+      ...o,
+      status: 'Delivered',
+      completedAt: new Date().toLocaleString()
+    } : o));
+  };
+
+  const updateOrderStatus = (id: string, status: Order['status']) => {
+    setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
   };
 
   const toggleFavorite = (id: string) => {
     setFavorites(prev => prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]);
   };
 
+  const addAddress = (addr: Address) => setAddresses(prev => [...prev, addr]);
+
+  const setDefaultPayment = (id: string) => {
+    setPaymentMethods(prev => prev.map(m => ({ ...m, isDefault: m.id === id })));
+  };
+
   return (
     <AppContext.Provider value={{
+      user, setUser, isLoggedIn: !!user, logout,
       cart, addToCart, removeFromCart, updateQuantity, clearCart,
       location, setLocation,
-      orders, addOrder, completeOrder,
-      favorites, toggleFavorite
+      orders, addOrder, completeOrder, updateOrderStatus,
+      favorites, toggleFavorite,
+      addresses, addAddress,
+      paymentMethods, setDefaultPayment
     }}>
       {children}
     </AppContext.Provider>
