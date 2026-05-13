@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, Suspense } from 'react';
+import React, { useState, useMemo, useEffect, Suspense, useCallback } from 'react';
 import { Search, Filter, Heart, Plus, ChevronLeft, X, SlidersHorizontal, Check } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -56,13 +56,13 @@ function MarketContent() {
     });
   }, [searchQuery, priceRange]);
 
-  const handleAddToCart = (item: any, type: 'product' | 'bundle') => {
+  const handleAddToCart = useCallback((item: any, type: 'product' | 'bundle') => {
     addToCart(item, type);
     setAddedItems(prev => ({ ...prev, [item.id]: true }));
     setTimeout(() => {
       setAddedItems(prev => ({ ...prev, [item.id]: false }));
     }, 2000);
-  };
+  }, [addToCart]);
 
   return (
     <div className="bg-white min-h-screen pb-32">
