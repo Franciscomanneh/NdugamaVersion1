@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, User, Phone, MapPin, Bell, Globe, Trash2, ShieldCheck, BadgeCheck } from 'lucide-react';
+import { ChevronLeft, User, Phone, MapPin, Bell, Globe, Trash2, ShieldCheck } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { cn } from '@/lib/utils';
 

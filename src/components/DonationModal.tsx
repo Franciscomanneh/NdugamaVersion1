@@ -16,10 +16,10 @@ export const DonationModal: React.FC<DonationModalProps> = ({ isOpen, onClose })
   const [customAmount, setCustomAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'Cash' | 'Wave' | 'AfriMoney' | 'QMoney'>('Wave');
 
-  const presetAmounts = [50, 100, 250, 500];
+  const presetAmounts = [50, 100, 250, 500, 1000];
 
   const handleDonate = () => {
-    // In a real app, this would trigger payment logic
+    // In a real app, this would trigger payment logic and save to Firebase
     setStep('success');
   };
 

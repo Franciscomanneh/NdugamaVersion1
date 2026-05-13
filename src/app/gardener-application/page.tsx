@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, BadgeCheck, Upload, Info, MessageCircle, MapPin, ShoppingBag } from 'lucide-react';
+import { ChevronLeft, ShieldCheck, Upload, Info, MessageCircle, MapPin, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function GardenerApplicationPage() {
@@ -32,7 +32,7 @@ export default function GardenerApplicationPage() {
           animate={{ scale: 1, opacity: 1 }}
           className="w-24 h-24 bg-green-100 text-primary rounded-[32px] flex items-center justify-center mb-8"
         >
-          <BadgeCheck size={48} />
+          <ShieldCheck size={48} />
         </motion.div>
         <h2 className="text-3xl font-black text-gray-800 mb-4">Application Received!</h2>
         <p className="text-gray-500 mb-2 leading-relaxed">

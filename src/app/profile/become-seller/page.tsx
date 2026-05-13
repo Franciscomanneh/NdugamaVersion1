@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Flower, Store, Truck, BadgeCheck } from 'lucide-react';
+import { ChevronLeft, Flower, Store, Truck, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function BecomeSellerPage() {
@@ -23,7 +23,7 @@ export default function BecomeSellerPage() {
       <main className="px-6 flex flex-col gap-8">
         <section className="bg-primary/10 p-8 rounded-[40px] text-center flex flex-col items-center gap-4">
           <div className="w-20 h-20 bg-primary rounded-3xl flex items-center justify-center text-white shadow-xl shadow-primary/20">
-            <BadgeCheck size={40} />
+            <ShieldCheck size={40} />
           </div>
           <h2 className="text-2xl font-black text-gray-800">Grow with Dugama</h2>
           <p className="text-sm text-gray-600">

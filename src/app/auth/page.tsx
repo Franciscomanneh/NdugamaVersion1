@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Lock, LogIn, Phone, User, BadgeCheck } from 'lucide-react';
+import { ChevronLeft, Lock, LogIn, Phone, User, ShieldCheck } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { motion } from 'framer-motion';
 
@@ -138,7 +138,7 @@ export default function LoginPage() {
 
       <footer className="mt-auto pt-12 flex flex-col items-center gap-4">
         <div className="flex items-center gap-2 text-primary">
-          <BadgeCheck size={18} />
+          <ShieldCheck size={18} />
           <span className="text-[10px] font-black uppercase tracking-[0.2em]">Safe & Secure</span>
         </div>
         <p className="text-[10px] text-gray-400 text-center max-w-[200px]">By signing in, you agree to our Terms of Service and Privacy Policy.</p>

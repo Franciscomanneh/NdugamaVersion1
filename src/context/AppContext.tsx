@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, Bundle } from '@/data/mock';
+import { firebaseService } from '@/lib/firebase';
 
 export interface CartItem {
   id: string;
@@ -177,7 +178,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const clearCart = () => setCart([]);
 
-  const addOrder = (order: Order) => setOrders(prev => [order, ...prev]);
+  const addOrder = (order: Order) => {
+    setOrders(prev => [order, ...prev]);
+    firebaseService.saveOrder(order);
+  };
 
   const completeOrder = (id: string) => {
     setOrders(prev => {
@@ -186,6 +190,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         status: 'Delivered' as const,
       } : o);
       localStorage.setItem('dugama_orders', JSON.stringify(newOrders));
+      firebaseService.updateOrderStatus(id, 'Delivered');
       return newOrders;
     });
   };
@@ -198,12 +203,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         completedAt: new Date().toLocaleString()
       } : o);
       localStorage.setItem('dugama_orders', JSON.stringify(newOrders));
+      firebaseService.updateOrderStatus(id, 'Delivered (Buyer Confirmed)');
       return newOrders;
     });
   };
 
   const updateOrderStatus = (id: string, status: Order['status']) => {
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+    firebaseService.updateOrderStatus(id, status);
   };
 
   const toggleFavorite = (id: string) => {

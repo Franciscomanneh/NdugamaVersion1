@@ -34,10 +34,10 @@ export default function TrackingPage({ params }: { params: Promise<{ id: string 
   }
 
   const steps = [
-    { status: 'Order Received', icon: Package, label: 'Confirmed', desc: 'We have received your order' },
-    { status: 'Shopping In Progress', icon: ShoppingBag, label: 'Picking', desc: 'Our team is at the market' },
-    { status: 'Out For Delivery', icon: Truck, label: 'On the Way', desc: 'Rider is heading to your location' },
-    { status: 'Delivered', icon: CheckCircle2, label: 'Completed', desc: 'Package has been delivered' },
+    { status: 'Order Received', icon: Package, label: 'Confirmed', desc: 'We have received your order', time: '09:30 AM' },
+    { status: 'Shopping In Progress', icon: ShoppingBag, label: 'Picking', desc: 'Our team is at the market', time: '10:15 AM' },
+    { status: 'Out For Delivery', icon: Truck, label: 'On the Way', desc: 'Rider is heading to your location', time: '11:00 AM' },
+    { status: 'Delivered', icon: CheckCircle2, label: 'Completed', desc: 'Package has been delivered', time: '11:45 AM' },
   ];
 
   const currentStepIndex = steps.findIndex(s => s.status === order.status);
@@ -65,9 +65,13 @@ export default function TrackingPage({ params }: { params: Promise<{ id: string 
              />
              <div className="absolute inset-0 flex items-center justify-center">
                 <div className="relative">
-                  <div className="w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center shadow-2xl animate-bounce">
+                  <motion.div
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                    className="w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center shadow-2xl"
+                  >
                     <Truck size={24} />
-                  </div>
+                  </motion.div>
                   <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full shadow-lg border border-gray-100 whitespace-nowrap">
                     <span className="text-[10px] font-black text-gray-800 uppercase tracking-widest">Moving to {order.deliveryZone}</span>
                   </div>
@@ -78,14 +82,21 @@ export default function TrackingPage({ params }: { params: Promise<{ id: string 
 
         {/* Status Timeline */}
         <div className="bg-white rounded-[40px] p-8 shadow-soft border border-gray-100">
-          <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-8 text-center">Delivery Progress</h2>
+          <div className="flex justify-between items-center mb-10 px-1">
+            <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Delivery Progress</h2>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              <span className="text-[10px] font-black text-primary uppercase tracking-widest">Live Updates</span>
+            </div>
+          </div>
 
           <div className="flex flex-col gap-10 relative">
             {/* Line connecting steps */}
             <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-gray-100" />
-            <div
+            <motion.div
+              initial={{ height: 0 }}
+              animate={{ height: `${(currentStepIndex / (steps.length - 1)) * 100}%` }}
               className="absolute left-6 top-6 w-0.5 bg-primary transition-all duration-1000"
-              style={{ height: `${(currentStepIndex / (steps.length - 1)) * 100}%` }}
             />
 
             {steps.map((step, idx) => {
@@ -95,25 +106,30 @@ export default function TrackingPage({ params }: { params: Promise<{ id: string 
               return (
                 <div key={idx} className="flex gap-6 relative z-10">
                   <div className={cn(
-                    "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500",
+                    "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 border-4 border-white shadow-sm",
                     isCurrent ? "bg-primary text-white scale-110 shadow-lg shadow-primary/20" :
-                    isActive ? "bg-primary/10 text-primary" : "bg-gray-50 text-gray-300"
+                    isActive ? "bg-green-50 text-primary border-green-100" : "bg-gray-50 text-gray-300"
                   )}>
                     <step.icon size={20} />
                   </div>
-                  <div>
-                    <h3 className={cn(
-                      "font-black tracking-tight",
-                      isActive ? "text-gray-800" : "text-gray-300"
-                    )}>
-                      {step.label}
-                    </h3>
-                    <p className={cn(
-                      "text-xs font-medium",
-                      isActive ? "text-gray-500" : "text-gray-200"
-                    )}>
-                      {step.desc}
-                    </p>
+                  <div className="flex-1 flex justify-between items-start">
+                    <div>
+                      <h3 className={cn(
+                        "font-black tracking-tight",
+                        isActive ? "text-gray-800" : "text-gray-300"
+                      )}>
+                        {step.label}
+                      </h3>
+                      <p className={cn(
+                        "text-xs font-medium",
+                        isActive ? "text-gray-500" : "text-gray-200"
+                      )}>
+                        {step.desc}
+                      </p>
+                    </div>
+                    {isActive && (
+                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest pt-1">{step.time}</span>
+                    )}
                   </div>
                 </div>
               );
@@ -144,20 +160,11 @@ export default function TrackingPage({ params }: { params: Promise<{ id: string 
           </div>
         )}
 
-        {/* Confirmation Button */}
-        {order.status === 'Out For Delivery' && (
-          <button
-            onClick={() => markOrderCompleted(order.id)}
-            className="w-full py-5 bg-white border-2 border-primary text-primary rounded-[24px] font-black uppercase tracking-widest shadow-soft active:bg-primary active:text-white transition-all"
-          >
-            I have received my order
-          </button>
-        )}
-
-        {order.status === 'Delivered' && !order.completedAt && (
+        {/* Confirmation Button - Buyer Only */}
+        {(order.status === 'Delivered' || order.status === 'Out For Delivery') && !order.completedAt && (
            <button
              onClick={() => markOrderCompleted(order.id)}
-             className="w-full py-5 bg-primary text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl shadow-primary/20"
+             className="w-full py-5 bg-primary text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 active:scale-95 transition-all"
            >
              Mark as Completed
            </button>

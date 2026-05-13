@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ShieldCheck, Lock, Eye, FileText, BadgeCheck } from 'lucide-react';
+import { ChevronLeft, ShieldCheck, Lock, Eye, FileText } from 'lucide-react';
 
 export default function PrivacyPolicyPage() {
   const router = useRouter();
@@ -66,7 +66,7 @@ export default function PrivacyPolicyPage() {
 
         <section className="mt-4 p-6 bg-green-50 rounded-3xl border border-green-100">
           <div className="flex items-center gap-3 mb-2 text-primary">
-            <BadgeCheck size={20} />
+            <ShieldCheck size={20} />
             <h4 className="font-bold text-sm">GDPR Compliant</h4>
           </div>
           <p className="text-[10px] text-green-700/70 font-medium leading-relaxed italic">
