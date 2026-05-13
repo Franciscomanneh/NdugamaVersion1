@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Product, Bundle } from '@/data/mock';
 import { firebaseService } from '@/lib/firebase';
 
@@ -135,12 +135,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('dugama_favorites', JSON.stringify(favorites));
   }, [favorites]);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
-    // Maybe not clear cart on logout for better UX?
-  };
+  }, [setUser]);
 
-  const addToCart = (item: Product | Bundle, type: 'product' | 'bundle', quantity: number = 1, customizedIngredients?: any[]) => {
+  const addToCart = useCallback((item: Product | Bundle, type: 'product' | 'bundle', quantity: number = 1, customizedIngredients?: any[]) => {
     setCart(prev => {
       // For products, we check if it already exists to update quantity
       if (type === 'product') {
@@ -160,13 +159,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ingredients: customizedIngredients
       }];
     });
-  };
+  }, [setCart]);
 
-  const removeFromCart = (id: string) => {
+  const removeFromCart = useCallback((id: string) => {
     setCart(prev => prev.filter(i => i.id !== id));
-  };
+  }, [setCart]);
 
-  const updateQuantity = (id: string, delta: number) => {
+  const updateQuantity = useCallback((id: string, delta: number) => {
     setCart(prev => prev.map(i => {
       if (i.id === id) {
         const newQty = Math.max(1, i.quantity + delta);
@@ -174,16 +173,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return i;
     }));
-  };
+  }, [setCart]);
 
-  const clearCart = () => setCart([]);
+  const clearCart = useCallback(() => setCart([]), [setCart]);
 
-  const addOrder = (order: Order) => {
+  const addOrder = useCallback((order: Order) => {
     setOrders(prev => [order, ...prev]);
     firebaseService.saveOrder(order);
-  };
+  }, [setOrders]);
 
-  const completeOrder = (id: string) => {
+  const completeOrder = useCallback((id: string) => {
     setOrders(prev => {
       const newOrders = prev.map(o => o.id === id ? {
         ...o,
@@ -193,9 +192,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       firebaseService.updateOrderStatus(id, 'Delivered');
       return newOrders;
     });
-  };
+  }, [setOrders]);
 
-  const markOrderCompleted = (id: string) => {
+  const markOrderCompleted = useCallback((id: string) => {
     setOrders(prev => {
       const newOrders = prev.map(o => o.id === id ? {
         ...o,
@@ -206,33 +205,72 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       firebaseService.updateOrderStatus(id, 'Delivered (Buyer Confirmed)');
       return newOrders;
     });
-  };
+  }, [setOrders]);
 
-  const updateOrderStatus = (id: string, status: Order['status']) => {
+  const updateOrderStatus = useCallback((id: string, status: Order['status']) => {
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
     firebaseService.updateOrderStatus(id, status);
-  };
+  }, [setOrders]);
 
-  const toggleFavorite = (id: string) => {
+  const toggleFavorite = useCallback((id: string) => {
     setFavorites(prev => prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]);
-  };
+  }, [setFavorites]);
 
-  const addAddress = (addr: Address) => setAddresses(prev => [...prev, addr]);
+  const addAddress = useCallback((addr: Address) => setAddresses(prev => [...prev, addr]), [setAddresses]);
 
-  const setDefaultPayment = (id: string) => {
+  const setDefaultPayment = useCallback((id: string) => {
     setPaymentMethods(prev => prev.map(m => ({ ...m, isDefault: m.id === id })));
-  };
+  }, [setPaymentMethods]);
+
+  const contextValue = useMemo(() => ({
+    user,
+    setUser,
+    isLoggedIn: !!user,
+    logout,
+    cart,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    location,
+    setLocation,
+    orders,
+    addOrder,
+    completeOrder,
+    markOrderCompleted,
+    updateOrderStatus,
+    favorites,
+    toggleFavorite,
+    addresses,
+    addAddress,
+    paymentMethods,
+    setDefaultPayment
+  }), [
+    user,
+    setUser,
+    logout,
+    cart,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    location,
+    setLocation,
+    orders,
+    addOrder,
+    completeOrder,
+    markOrderCompleted,
+    updateOrderStatus,
+    favorites,
+    toggleFavorite,
+    addresses,
+    addAddress,
+    paymentMethods,
+    setDefaultPayment
+  ]);
 
   return (
-    <AppContext.Provider value={{
-      user, setUser, isLoggedIn: !!user, logout,
-      cart, addToCart, removeFromCart, updateQuantity, clearCart,
-      location, setLocation,
-      orders, addOrder, completeOrder, markOrderCompleted, updateOrderStatus,
-      favorites, toggleFavorite,
-      addresses, addAddress,
-      paymentMethods, setDefaultPayment
-    }}>
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );

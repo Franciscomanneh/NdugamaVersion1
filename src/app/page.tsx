@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Search, ChevronRight, Plus, MapPin, Heart } from 'lucide-react';
 import { categories, gardeners, bundles, products } from '@/data/mock';
@@ -15,13 +15,19 @@ export default function HomePage() {
 
   const locations = ['Banjul', 'Serrekunda', 'Brikama', 'Bakau'];
 
-  const filteredBundles = bundles.filter(b =>
-    b.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredBundles = useMemo(() =>
+    bundles.filter(b =>
+      b.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ),
+    [searchQuery]
   );
 
-  const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.category.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProducts = useMemo(() =>
+    products.filter(p =>
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.category.toLowerCase().includes(searchQuery.toLowerCase())
+    ),
+    [searchQuery]
   );
 
   return (
