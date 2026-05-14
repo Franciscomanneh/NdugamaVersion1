@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Search, ChevronRight, Plus, MapPin, Heart } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
@@ -12,24 +12,27 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
 
-  const locations = ['Banjul', 'Serrekunda', 'Brikama', 'Bakau'];
+  // Memoize constant data to avoid recreation on every render
+  const locations = useMemo(() => ['Banjul', 'Serrekunda', 'Brikama', 'Bakau'], []);
 
-  const filteredBundles = bundles.filter(b =>
+  // Memoize filtered data to prevent expensive recalculations on every render
+  const filteredBundles = useMemo(() => bundles.filter(b =>
     b.bundleName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [bundles, searchQuery]);
 
-  const filteredProducts = products.filter(p =>
+  const filteredProducts = useMemo(() => products.filter(p =>
     p.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [products, searchQuery]);
 
-  const categories = [
+  // Memoize static lists
+  const categories = useMemo(() => [
     { id: '1', name: 'Vegetables', icon: '🥕' },
     { id: '2', name: 'Fruits', icon: '🍎' },
     { id: '3', name: 'Fish', icon: '🐟' },
     { id: '4', name: 'Spices', icon: '🌶️' },
     { id: '5', name: 'Bread', icon: '🥖' },
-  ];
+  ], []);
 
   return (
     <div className="flex flex-col gap-8 pb-10">
