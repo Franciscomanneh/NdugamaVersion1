@@ -2,12 +2,16 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ShieldCheck, Upload, Info, MessageCircle, MapPin, ShoppingBag } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ShieldCheck, Upload, Info, MessageCircle, MapPin, Image as ImageIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { firebaseService } from '@/lib/firebase';
+import { useAppContext } from '@/context/AppContext';
 
 export default function GardenerApplicationPage() {
   const router = useRouter();
+  const { user } = useAppContext();
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     whatsapp: '',
@@ -15,13 +19,41 @@ export default function GardenerApplicationPage() {
     about: '',
     products: ''
   });
+  const [files, setFiles] = useState<{ profile?: File, garden?: File }>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    setTimeout(() => {
-      router.push('/profile');
-    }, 3000);
+    if (!user) {
+      alert("Please sign in first");
+      router.push('/auth');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const images = [];
+      if (files.profile) images.push(files.profile);
+      if (files.garden) images.push(files.garden);
+
+      await firebaseService.submitSellerApplication({
+        userId: user.uid,
+        applicantName: formData.name,
+        whatsappNumber: formData.whatsapp,
+        location: formData.location,
+        bio: formData.about,
+        products: formData.products,
+        email: user.email
+      }, images);
+
+      setIsSubmitted(true);
+      setTimeout(() => {
+        router.push('/profile');
+      }, 3000);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (isSubmitted) {
@@ -134,23 +166,35 @@ export default function GardenerApplicationPage() {
           <div className="flex flex-col gap-4">
             <h3 className="font-black text-gray-800 uppercase tracking-widest text-[10px]">Verification Photos</h3>
             <div className="grid grid-cols-2 gap-3">
-              <div className="aspect-square bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 text-gray-400 group hover:border-primary/30 transition-colors cursor-pointer">
-                <Upload size={24} />
-                <span className="text-[10px] font-bold uppercase">Profile Photo</span>
-              </div>
-              <div className="aspect-square bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 text-gray-400 group hover:border-primary/30 transition-colors cursor-pointer">
-                <Upload size={24} />
-                <span className="text-[10px] font-bold uppercase">Garden Photo</span>
-              </div>
+              <label className="aspect-square bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 text-gray-400 group hover:border-primary/30 transition-colors cursor-pointer overflow-hidden">
+                {files.profile ? <img src={URL.createObjectURL(files.profile)} className="w-full h-full object-cover" /> : (
+                  <>
+                    <Upload size={24} />
+                    <span className="text-[10px] font-bold uppercase">Profile Photo</span>
+                  </>
+                )}
+                <input type="file" className="hidden" accept="image/*" onChange={(e) => setFiles({ ...files, profile: e.target.files?.[0] })} />
+              </label>
+              <label className="aspect-square bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 text-gray-400 group hover:border-primary/30 transition-colors cursor-pointer overflow-hidden">
+                {files.garden ? <img src={URL.createObjectURL(files.garden)} className="w-full h-full object-cover" /> : (
+                  <>
+                    <Upload size={24} />
+                    <span className="text-[10px] font-bold uppercase">Garden Photo</span>
+                  </>
+                )}
+                <input type="file" className="hidden" accept="image/*" onChange={(e) => setFiles({ ...files, garden: e.target.files?.[0] })} />
+              </label>
             </div>
-            <p className="text-[10px] text-gray-400 font-medium italic">Upload 4–5 gallery photos of your products and garden area.</p>
+            <p className="text-[10px] text-gray-400 font-medium italic">Please provide clear photos for faster approval.</p>
           </div>
 
           <button
             type="submit"
-            className="w-full py-5 bg-primary text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 active:scale-[0.98] transition-all mt-4"
+            disabled={loading}
+            className="w-full py-5 bg-primary text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 active:scale-[0.98] transition-all mt-4 flex items-center justify-center gap-2"
           >
-            Submit Application
+            {loading && <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+            {loading ? 'Submitting...' : 'Submit Application'}
           </button>
         </form>
       </main>

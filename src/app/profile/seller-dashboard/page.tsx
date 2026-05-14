@@ -43,11 +43,11 @@ export default function SellerDashboard() {
           </button>
           <div>
             <h1 className="text-xl font-bold text-gray-800">Seller Hub</h1>
-            <p className="text-[10px] font-bold text-primary uppercase tracking-widest">{user?.name || 'Garden Admin'}</p>
+            <p className="text-[10px] font-bold text-primary uppercase tracking-widest">{user?.fullName || 'Garden Admin'}</p>
           </div>
         </div>
         <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-soft">
-          <img src={user?.image || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"} className="w-full h-full object-cover" />
+          <img src={user?.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"} className="w-full h-full object-cover" />
         </div>
       </header>
 

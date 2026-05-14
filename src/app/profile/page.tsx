@@ -124,7 +124,7 @@ export default function ProfilePage() {
     { label: 'My Orders', icon: ClipboardList, href: '/orders', color: 'text-blue-500', bg: 'bg-blue-50' },
     { label: 'My Addresses', icon: MapPin, href: '/profile/addresses', color: 'text-green-500', bg: 'bg-green-50' },
     { label: 'Payment Methods', icon: CreditCard, href: '/profile/payment-methods', color: 'text-purple-500', bg: 'bg-purple-50' },
-    { label: 'Become a Seller', icon: Store, href: '/gardener-application', color: 'text-primary', bg: 'bg-green-50', show: user?.role === 'user' && !user?.isApprovedSeller },
+    { label: 'Become a Seller', icon: Store, href: '/gardener-application', color: 'text-primary', bg: 'bg-green-50', show: user?.role === 'customer' },
     { label: 'Settings', icon: Settings, href: '/profile/settings', color: 'text-gray-500', bg: 'bg-gray-50' },
     { label: 'Privacy Policy', icon: ShieldCheck, href: '/profile/privacy', color: 'text-orange-500', bg: 'bg-orange-50' },
     { label: 'Help & Support', icon: HelpCircle, href: '/profile/help', color: 'text-red-500', bg: 'bg-red-50' },
@@ -140,7 +140,7 @@ export default function ProfilePage() {
         <div className="relative">
           <div className="w-28 h-28 rounded-[32px] overflow-hidden border-4 border-primary/10 shadow-xl">
             <img
-              src={user?.image || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"}
+              src={user?.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"}
               alt="User"
               className="w-full h-full object-cover"
             />
@@ -149,8 +149,8 @@ export default function ProfilePage() {
             <Camera size={18} />
           </button>
         </div>
-        <h2 className="text-2xl font-black mt-6 tracking-tight">{user?.name}</h2>
-        <p className="text-gray-400 font-bold text-sm uppercase tracking-wider">{user?.phone}</p>
+        <h2 className="text-2xl font-black mt-6 tracking-tight">{user?.fullName}</h2>
+        <p className="text-gray-400 font-bold text-sm uppercase tracking-wider">{user?.phoneNumber}</p>
       </div>
 
       {/* Stats */}
@@ -173,7 +173,7 @@ export default function ProfilePage() {
 
       {/* Menu List */}
       <div className="px-6 flex flex-col gap-4">
-        {(user?.role === 'seller' || user?.isApprovedSeller) && (
+        {user?.role === 'seller' && (
           <button
             onClick={() => router.push('/profile/seller-dashboard')}
             className="w-full p-8 bg-gradient-to-br from-primary to-green-700 rounded-[40px] text-white shadow-2xl shadow-primary/20 group active:scale-[0.98] transition-all relative overflow-hidden"

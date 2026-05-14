@@ -2,17 +2,18 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, User, Phone, MapPin, Bell, Globe, Trash2, ShieldCheck } from 'lucide-react';
+import { ChevronLeft, User, Phone, MapPin, Bell, Globe, Trash2 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
+import { firebaseService } from '@/lib/firebase';
 import { cn } from '@/lib/utils';
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { user, setUser, isLoggedIn, logout } = useAppContext();
+  const { user, isLoggedIn, logout } = useAppContext();
 
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    phone: user?.phone || '',
+    fullName: user?.fullName || '',
+    phoneNumber: user?.phoneNumber || '',
     location: user?.location || ''
   });
 
@@ -31,9 +32,9 @@ export default function SettingsPage() {
     );
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (user) {
-      setUser({ ...user, ...formData });
+      await firebaseService.updateUserData(user.uid, formData);
       router.back();
     }
   };
@@ -58,8 +59,8 @@ export default function SettingsPage() {
               <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input
                 type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                value={formData.fullName}
+                onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                 className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-6 text-sm font-bold focus:ring-2 focus:ring-primary/20"
                 placeholder="Full Name"
               />
@@ -68,8 +69,8 @@ export default function SettingsPage() {
               <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input
                 type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                value={formData.phoneNumber}
+                onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
                 className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-6 text-sm font-bold focus:ring-2 focus:ring-primary/20"
                 placeholder="Phone Number"
               />

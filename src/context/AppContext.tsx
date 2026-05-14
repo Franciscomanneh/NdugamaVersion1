@@ -1,8 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Product, Bundle } from '@/data/mock';
-import { firebaseService } from '@/lib/firebase';
+import { firebaseService, auth } from '@/lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export interface CartItem {
   id: string;
@@ -11,27 +11,67 @@ export interface CartItem {
   quantity: number;
   image: string;
   type: 'product' | 'bundle';
-  ingredients?: any[]; // For bundles
+  ingredients?: any[];
 }
 
 export interface Order {
   id: string;
-  date: string;
+  customerId: string;
+  customerName: string;
+  date: any;
   total: number;
-  status: 'Order Received' | 'Shopping In Progress' | 'Out For Delivery' | 'Delivered';
+  status: 'Order Received' | 'Shopping In Progress' | 'Out For Delivery' | 'Delivered' | 'Delivered Successfully';
   items: CartItem[];
   deliveryZone: string;
-  completedAt?: string;
+  completedAt?: any;
 }
 
 export interface User {
-  id: string;
-  name: string;
-  phone: string;
+  uid: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
   location: string;
-  image?: string;
-  role: 'user' | 'admin' | 'seller';
-  isApprovedSeller?: boolean;
+  profileImage?: string;
+  role: 'customer' | 'admin' | 'seller';
+  createdAt?: any;
+}
+
+export interface Product {
+  id: string;
+  productName: string;
+  category: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  stockQuantity: string;
+  sellerId: string;
+  sellerName: string;
+  unit: string;
+  isFeatured?: boolean;
+}
+
+export interface Bundle {
+  id: string;
+  bundleName: string;
+  description: string;
+  bundleImage: string;
+  ingredients: any[];
+  totalPrice: number;
+  customizable?: boolean;
+  cookingDescription?: string;
+}
+
+export interface Seller {
+  id: string;
+  sellerId: string;
+  name: string;
+  whatsappNumber: string;
+  location: string;
+  bio: string;
+  profileImage: string;
+  approvedStatus: boolean;
+  featuredStatus: boolean;
 }
 
 interface Address {
@@ -48,33 +88,30 @@ interface PaymentMethod {
 }
 
 interface AppContextType {
-  // Auth
   user: User | null;
-  setUser: (user: User | null) => void;
+  loading: boolean;
   isLoggedIn: boolean;
   logout: () => void;
 
-  // Cart
   cart: CartItem[];
-  addToCart: (item: Product | Bundle, type: 'product' | 'bundle', quantity?: number, customizedIngredients?: any[]) => void;
+  addToCart: (item: any, type: 'product' | 'bundle', quantity?: number, customizedIngredients?: any[]) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, delta: number) => void;
   clearCart: () => void;
 
-  // Location & Preferences
   location: string;
   setLocation: (loc: string) => void;
   favorites: string[];
   toggleFavorite: (id: string) => void;
 
-  // Orders
+  products: Product[];
+  bundles: Bundle[];
+  sellers: Seller[];
   orders: Order[];
-  addOrder: (order: Order) => void;
-  completeOrder: (id: string) => void;
-  markOrderCompleted: (id: string) => void;
-  updateOrderStatus: (id: string, status: Order['status']) => void;
+  addOrder: (order: any) => Promise<void>;
+  updateOrderStatus: (id: string, status: string) => Promise<void>;
+  markOrderCompleted: (id: string) => Promise<void>;
 
-  // Profile data
   addresses: Address[];
   addAddress: (addr: Address) => void;
   paymentMethods: PaymentMethod[];
@@ -85,10 +122,15 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [location, setLocation] = useState('Serrekunda');
-  const [orders, setOrders] = useState<Order[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [bundles, setBundles] = useState<Bundle[]>([]);
+  const [sellers, setSellers] = useState<Seller[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+
   const [addresses, setAddresses] = useState<Address[]>([
     { id: '1', label: 'Home', address: 'House 42, Kairaba Avenue', isDefault: true }
   ]);
@@ -98,64 +140,142 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     { id: '3', type: 'AfriMoney', isDefault: false },
   ]);
 
-  // Load from localStorage on mount
+  // Auth Listener
   useEffect(() => {
-    const savedUser = localStorage.getItem('dugama_user');
-    const savedCart = localStorage.getItem('dugama_cart');
-    const savedLocation = localStorage.getItem('dugama_location');
-    const savedOrders = localStorage.getItem('dugama_orders');
-    const savedFavorites = localStorage.getItem('dugama_favorites');
+    let unsubUser: () => void = () => {};
 
-    if (savedUser) setUser(JSON.parse(savedUser));
-    if (savedCart) setCart(JSON.parse(savedCart));
-    if (savedLocation) setLocation(savedLocation);
-    if (savedOrders) setOrders(JSON.parse(savedOrders));
-    if (savedFavorites) setFavorites(JSON.parse(savedFavorites));
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        unsubUser = firebaseService.subscribeToUserData(firebaseUser.uid, (userData) => {
+          setUser(userData as User);
+          setLoading(false);
+        });
+      } else {
+        setUser(null);
+        setLoading(false);
+        unsubUser();
+      }
+    });
+    return () => {
+      unsubscribe();
+      unsubUser();
+    };
   }, []);
 
-  // Save to localStorage
+  // Data Listeners
   useEffect(() => {
-    if (user) localStorage.setItem('dugama_user', JSON.stringify(user));
-    else localStorage.removeItem('dugama_user');
+    const unsubProducts = firebaseService.subscribeToProducts((data: any[]) => {
+      setProducts(data.map(p => ({
+        id: p.id,
+        productName: p.productName,
+        category: p.category,
+        description: p.description,
+        price: Number(p.price),
+        imageUrl: p.imageUrl,
+        stockQuantity: p.stockQuantity,
+        sellerId: p.sellerId,
+        sellerName: p.sellerName,
+        unit: p.unit || 'unit',
+        isFeatured: p.isFeatured
+      })));
+    });
+
+    const unsubBundles = firebaseService.subscribeToBundles((data: any[]) => {
+      setBundles(data.map(b => ({
+        id: b.id,
+        bundleName: b.bundleName,
+        description: b.description,
+        bundleImage: b.bundleImage,
+        ingredients: b.ingredients || [],
+        totalPrice: Number(b.totalPrice),
+        customizable: b.customizable,
+        cookingDescription: b.cookingDescription
+      })));
+    });
+
+    const unsubSellers = firebaseService.subscribeToSellers((data: any[]) => {
+      setSellers(data.map(s => ({
+        id: s.id,
+        sellerId: s.sellerId,
+        name: s.name,
+        whatsappNumber: s.whatsappNumber,
+        location: s.location,
+        bio: s.bio,
+        profileImage: s.profileImage,
+        approvedStatus: s.approvedStatus,
+        featuredStatus: s.featuredStatus
+      })));
+    });
+
+    return () => {
+      unsubProducts();
+      unsubBundles();
+      unsubSellers();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user) {
+      setOrders([]);
+      return;
+    }
+    const unsubOrders = firebaseService.subscribeToOrders(user.uid, user.role, (data: any[]) => {
+      setOrders(data.map(o => ({
+        id: o.id,
+        customerId: o.customerId,
+        customerName: o.customerName,
+        date: o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString() : 'Just now',
+        total: o.totalAmount,
+        status: o.deliveryStatus,
+        items: o.products,
+        deliveryZone: o.deliveryAddress,
+        completedAt: o.completedAt
+      })));
+    });
+    return () => unsubOrders();
   }, [user]);
+
+  // Local Storage Persistence for Cart & Favorites
+  useEffect(() => {
+    const savedCart = localStorage.getItem('dugama_cart');
+    const savedFavorites = localStorage.getItem('dugama_favorites');
+    const savedLocation = localStorage.getItem('dugama_location');
+
+    if (savedCart) setCart(JSON.parse(savedCart));
+    if (savedFavorites) setFavorites(JSON.parse(savedFavorites));
+    if (savedLocation) setLocation(savedLocation);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('dugama_cart', JSON.stringify(cart));
   }, [cart]);
 
   useEffect(() => {
-    localStorage.setItem('dugama_location', location);
-  }, [location]);
-
-  useEffect(() => {
-    localStorage.setItem('dugama_orders', JSON.stringify(orders));
-  }, [orders]);
-
-  useEffect(() => {
     localStorage.setItem('dugama_favorites', JSON.stringify(favorites));
   }, [favorites]);
 
-  const logout = () => {
-    setUser(null);
-    // Maybe not clear cart on logout for better UX?
+  useEffect(() => {
+    localStorage.setItem('dugama_location', location);
+  }, [location]);
+
+  const logout = async () => {
+    await firebaseService.logoutUser();
   };
 
-  const addToCart = (item: Product | Bundle, type: 'product' | 'bundle', quantity: number = 1, customizedIngredients?: any[]) => {
+  const addToCart = (item: any, type: 'product' | 'bundle', quantity: number = 1, customizedIngredients?: any[]) => {
     setCart(prev => {
-      // For products, we check if it already exists to update quantity
       if (type === 'product') {
         const existing = prev.find(i => i.id === item.id && i.type === 'product');
         if (existing) {
           return prev.map(i => i.id === item.id && i.type === 'product' ? { ...i, quantity: i.quantity + quantity } : i);
         }
       }
-      // For bundles, or new products, add new item
       return [...prev, {
-        id: item.id + (type === 'bundle' ? '-' + Math.random().toString(36).substr(2, 5) : ''), // unique ID for customized bundles
-        name: item.name,
-        price: item.price,
+        id: item.id + (type === 'bundle' ? '-' + Math.random().toString(36).substr(2, 5) : ''),
+        name: type === 'product' ? item.productName : item.bundleName,
+        price: type === 'product' ? item.price : item.totalPrice,
         quantity,
-        image: item.image,
+        image: type === 'product' ? item.imageUrl : item.bundleImage,
         type,
         ingredients: customizedIngredients
       }];
@@ -178,39 +298,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const clearCart = () => setCart([]);
 
-  const addOrder = (order: Order) => {
-    setOrders(prev => [order, ...prev]);
-    firebaseService.saveOrder(order);
+  const addOrder = async (orderData: any) => {
+    await firebaseService.createOrder(orderData);
   };
 
-  const completeOrder = (id: string) => {
-    setOrders(prev => {
-      const newOrders = prev.map(o => o.id === id ? {
-        ...o,
-        status: 'Delivered' as const,
-      } : o);
-      localStorage.setItem('dugama_orders', JSON.stringify(newOrders));
-      firebaseService.updateOrderStatus(id, 'Delivered');
-      return newOrders;
-    });
+  const updateOrderStatus = async (id: string, status: string) => {
+    await firebaseService.updateOrderStatus(id, status);
   };
 
-  const markOrderCompleted = (id: string) => {
-    setOrders(prev => {
-      const newOrders = prev.map(o => o.id === id ? {
-        ...o,
-        status: 'Delivered' as const,
-        completedAt: new Date().toLocaleString()
-      } : o);
-      localStorage.setItem('dugama_orders', JSON.stringify(newOrders));
-      firebaseService.updateOrderStatus(id, 'Delivered (Buyer Confirmed)');
-      return newOrders;
-    });
-  };
-
-  const updateOrderStatus = (id: string, status: Order['status']) => {
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
-    firebaseService.updateOrderStatus(id, status);
+  const markOrderCompleted = async (id: string) => {
+    await firebaseService.updateOrderStatus(id, "Delivered Successfully");
   };
 
   const toggleFavorite = (id: string) => {
@@ -225,11 +322,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider value={{
-      user, setUser, isLoggedIn: !!user, logout,
+      user, loading, isLoggedIn: !!user, logout,
       cart, addToCart, removeFromCart, updateQuantity, clearCart,
       location, setLocation,
-      orders, addOrder, completeOrder, markOrderCompleted, updateOrderStatus,
       favorites, toggleFavorite,
+      products, bundles, sellers, orders,
+      addOrder, updateOrderStatus, markOrderCompleted,
       addresses, addAddress,
       paymentMethods, setDefaultPayment
     }}>
