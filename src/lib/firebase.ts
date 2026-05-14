@@ -67,7 +67,7 @@ export const firebaseService = {
   },
 
   async updateProduct(productId: any, productData: any, imageFile: any) {
-    let updateData = { ...productData };
+    const updateData = { ...productData };
     if (imageFile) {
       const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
       await uploadBytes(storageRef, imageFile);

@@ -2,32 +2,35 @@
 
 import React, { useState, use, useMemo } from 'react';
 import { ChevronLeft, Plus, Trash2, ShoppingBag, Settings2, Minus, History, UtensilsCrossed } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { bundles } from '@/data/mock';
-import { notFound } from 'next/navigation';
+import { useRouter, notFound } from 'next/navigation';
 import { useAppContext } from '@/context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function BundleDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const { addToCart } = useAppContext();
+  const { addToCart, bundles, loading } = useAppContext();
 
   const bundle = bundles.find(b => b.id === id);
 
-  const [ingredients, setIngredients] = useState(
-    bundle?.ingredients.map(ing => ({ ...ing, active: true, isCustom: false })) || []
-  );
+  const [ingredients, setIngredients] = useState<any[]>([]);
   const [added, setAdded] = useState(false);
   const [newIngredient, setNewIngredient] = useState('');
 
-  if (!bundle) notFound();
+  React.useEffect(() => {
+    if (bundle) {
+      setIngredients(bundle.ingredients.map((ing: any) => ({ ...ing, active: true, isCustom: false })));
+    }
+  }, [bundle]);
 
   const currentTotal = useMemo(() => {
     return ingredients.reduce((acc, ing) => {
       return acc + (ing.active ? ing.pricePerUnit * ing.amount : 0);
     }, 0);
   }, [ingredients]);
+
+  if (loading) return null;
+  if (!bundle) notFound();
 
   const toggleIngredient = (name: string) => {
     setIngredients(prev => prev.map(ing =>
@@ -70,7 +73,7 @@ export default function BundleDetailsPage({ params }: { params: Promise<{ id: st
     <div className="bg-white min-h-screen pb-32">
       {/* Header */}
       <div className="relative h-[300px] w-full shadow-lg">
-        <img src={bundle.image} alt={bundle.name} className="w-full h-full object-cover" />
+        <img src={bundle.bundleImage} alt={bundle.bundleName} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         <button
           onClick={() => router.back()}
@@ -80,7 +83,7 @@ export default function BundleDetailsPage({ params }: { params: Promise<{ id: st
         </button>
         <div className="absolute bottom-6 left-6 right-6">
           <span className="bg-orange-500 text-white text-[10px] font-black uppercase px-3 py-1 rounded-full mb-2 inline-block shadow-lg">Recipe Bundle</span>
-          <h1 className="text-3xl font-black text-white drop-shadow-md">{bundle.name}</h1>
+          <h1 className="text-3xl font-black text-white drop-shadow-md">{bundle.bundleName}</h1>
         </div>
       </div>
 
@@ -187,7 +190,7 @@ export default function BundleDetailsPage({ params }: { params: Promise<{ id: st
             <h3 className="font-bold">Dugama Promise</h3>
           </div>
           <p className="text-xs text-gray-500 leading-relaxed italic">
-            Ingredients are sourced directly from gardens on the morning of delivery to ensure your {bundle.name} tastes authentic and fresh.
+            Ingredients are sourced directly from gardens on the morning of delivery to ensure your {bundle.bundleName} tastes authentic and fresh.
           </p>
         </section>
       </main>

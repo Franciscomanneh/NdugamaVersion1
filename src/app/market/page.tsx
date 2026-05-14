@@ -4,7 +4,6 @@ import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import { Search, Filter, Heart, Plus, ChevronLeft, X, SlidersHorizontal, Check } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { categories, bundles, products } from '@/data/mock';
 import { cn } from '@/lib/utils';
 import { useAppContext } from '@/context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,7 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 function MarketContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { addToCart, favorites, toggleFavorite } = useAppContext();
+  const { addToCart, favorites, toggleFavorite, products, bundles } = useAppContext();
 
   const [activeTab, setActiveTab] = useState<'products' | 'bundles'>(
     (searchParams.get('tab') as 'products' | 'bundles') || 'products'
@@ -37,7 +36,7 @@ function MarketContent() {
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
       const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
-      const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      const matchesSearch = p.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             p.category.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesPrice = p.price >= priceRange[0] && p.price <= priceRange[1];
       return matchesCategory && matchesSearch && matchesPrice;
@@ -46,15 +45,15 @@ function MarketContent() {
       if (sortBy === 'price-high') return b.price - a.price;
       return 0;
     });
-  }, [selectedCategory, searchQuery, priceRange, sortBy]);
+  }, [selectedCategory, searchQuery, priceRange, sortBy, products]);
 
   const filteredBundles = useMemo(() => {
     return bundles.filter(b => {
-      const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesPrice = b.price >= priceRange[0] && b.price <= priceRange[1];
+      const matchesSearch = b.bundleName.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesPrice = b.totalPrice >= priceRange[0] && b.totalPrice <= priceRange[1];
       return matchesSearch && matchesPrice;
     });
-  }, [searchQuery, priceRange]);
+  }, [searchQuery, priceRange, bundles]);
 
   const handleAddToCart = (item: any, type: 'product' | 'bundle') => {
     addToCart(item, type);
@@ -129,7 +128,7 @@ function MarketContent() {
         {/* Categories Bar (Only show for products) */}
         {activeTab === 'products' && (
           <div className="flex gap-2 overflow-x-auto hide-scrollbar -mx-6 px-6">
-            {['All', ...categories.map(c => c.name)].map((cat) => (
+            {['All', 'Vegetables', 'Fruits', 'Fish', 'Spices', 'Bread'].map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
@@ -174,11 +173,11 @@ function MarketContent() {
                 filteredBundles.map((bundle) => (
                   <div key={bundle.id} className="rounded-[32px] overflow-hidden bg-white border border-gray-100 shadow-soft group">
                     <Link href={`/bundle/${bundle.id}`} className="block relative h-52">
-                      <img src={bundle.image} alt={bundle.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <img src={bundle.bundleImage} alt={bundle.bundleName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                       <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
-                        <h3 className="text-xl font-black text-white">{bundle.name}</h3>
-                        <span className="text-2xl font-black text-white">D{bundle.price}</span>
+                        <h3 className="text-xl font-black text-white">{bundle.bundleName}</h3>
+                        <span className="text-2xl font-black text-white">D{bundle.totalPrice}</span>
                       </div>
                     </Link>
                     <div className="p-5">
@@ -235,7 +234,7 @@ function MarketContent() {
                     <div key={p.id} className="bg-white rounded-[32px] overflow-hidden border border-gray-100 shadow-soft flex flex-col group">
                       <div className="relative h-44 w-full overflow-hidden">
                         <Link href={`/product/${p.id}`}>
-                          <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                          <img src={p.imageUrl} alt={p.productName} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                         </Link>
                         <button
                           onClick={() => toggleFavorite(p.id)}
@@ -255,7 +254,7 @@ function MarketContent() {
                       </div>
                       <Link href={`/product/${p.id}`} className="p-4 flex-1 flex flex-col justify-between">
                         <div>
-                          <h3 className="text-sm font-bold text-gray-800 mb-1 line-clamp-1">{p.name}</h3>
+                          <h3 className="text-sm font-bold text-gray-800 mb-1 line-clamp-1">{p.productName}</h3>
                           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{p.category}</span>
                         </div>
                         <div className="flex items-center gap-1 mt-3">

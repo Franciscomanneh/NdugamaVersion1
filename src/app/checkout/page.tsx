@@ -29,7 +29,7 @@ export default function CheckoutPage() {
     }
   }, [cart, router, isPlacing]);
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!deliveryZones.includes(location)) {
       setIsUnsupported(true);
       return;
@@ -37,20 +37,32 @@ export default function CheckoutPage() {
 
     setIsPlacing(true);
 
-    const newOrder = {
-      id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-      date: new Date().toLocaleDateString(),
-      total: total,
-      status: 'Order Received' as const,
-      items: [...cart],
-      deliveryZone: location
-    };
+    try {
+        const orderData = {
+          customerId: 'anonymous', // Would be real user ID in production
+          customerName: 'Dugama Buyer',
+          totalAmount: total,
+          deliveryAddress: address,
+          deliveryZone: location,
+          phoneNumber: phone,
+          products: cart.map(item => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            image: item.image
+          }))
+        };
 
-    setTimeout(() => {
-      addOrder(newOrder);
-      clearCart();
-      router.push('/order-success');
-    }, 2000);
+        await addOrder(orderData);
+        clearCart();
+        router.push('/order-success');
+    } catch (err) {
+        console.error(err);
+        alert('Error placing order');
+    } finally {
+        setIsPlacing(false);
+    }
   };
 
   if (cart.length === 0 && !isPlacing) return null;

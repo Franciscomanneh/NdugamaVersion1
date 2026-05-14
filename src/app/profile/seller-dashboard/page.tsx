@@ -4,19 +4,18 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ChevronLeft, Plus, Edit, Trash2, ShoppingBag,
-  Users, DollarSign, Package, TrendingUp, Search, X, Image as ImageIcon, MessageCircle
+  DollarSign, Package, TrendingUp, X, Image as ImageIcon, MessageCircle
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
-import { products as initialProducts } from '@/data/mock';
+import { firebaseService } from '@/lib/firebase';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function SellerDashboard() {
   const router = useRouter();
-  const { user } = useAppContext();
+  const { user, products } = useAppContext();
 
-  // Local state for seller-specific view simulator
-  const [sellerProducts, setSellerProducts] = useState(initialProducts.slice(0, 4));
+  const sellerProducts = products.filter(p => p.sellerId === user?.uid);
   const [activeTab, setActiveTab] = useState<'inventory' | 'sales' | 'stats'>('inventory');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
@@ -27,11 +26,51 @@ export default function SellerDashboard() {
     { label: 'Views', value: '1,240', icon: TrendingUp, color: 'text-orange-500', bg: 'bg-orange-50' },
   ];
 
-  const handleAddProduct = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+  const [productForm, setProductForm] = useState({
+    productName: '',
+    price: 0,
+    unit: 'kg',
+    category: 'Vegetables',
+    description: '',
+    stockQuantity: '50kg'
+  });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would save to Firebase
-    setIsAddModalOpen(false);
-    setEditingProduct(null);
+    setLoading(true);
+    try {
+      if (editingProduct) {
+        await firebaseService.updateProduct(editingProduct.id, {
+          ...productForm,
+          sellerId: user?.uid,
+          sellerName: user?.fullName
+        }, imageFile);
+      } else {
+        await firebaseService.addProduct({
+          ...productForm,
+          sellerId: user?.uid,
+          sellerName: user?.fullName
+        }, imageFile);
+      }
+      setIsAddModalOpen(false);
+      setEditingProduct(null);
+      setImageFile(null);
+      setProductForm({
+        productName: '',
+        price: 0,
+        unit: 'kg',
+        category: 'Vegetables',
+        description: '',
+        stockQuantity: '50kg'
+      });
+    } catch (err) {
+      console.error(err);
+      alert('Error saving product');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,7 +86,11 @@ export default function SellerDashboard() {
           </div>
         </div>
         <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-soft">
-          <img src={user?.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"} className="w-full h-full object-cover" />
+          <img
+            src={user?.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"}
+            alt="Profile"
+            className="w-full h-full object-cover"
+          />
         </div>
       </header>
 
@@ -102,6 +145,14 @@ export default function SellerDashboard() {
                 <button
                   onClick={() => {
                     setEditingProduct(null);
+                    setProductForm({
+                        productName: '',
+                        price: 0,
+                        unit: 'kg',
+                        category: 'Vegetables',
+                        description: '',
+                        stockQuantity: '50kg'
+                    });
                     setIsAddModalOpen(true);
                   }}
                   className="flex items-center gap-1.5 px-4 py-2 bg-primary/10 text-primary rounded-xl font-black text-[10px] uppercase tracking-widest"
@@ -110,18 +161,23 @@ export default function SellerDashboard() {
                 </button>
               </div>
 
-              {sellerProducts.map((p) => (
+              {sellerProducts.length === 0 ? (
+                  <div className="bg-white rounded-[32px] p-10 text-center border border-dashed border-gray-200">
+                      <ShoppingBag className="mx-auto text-gray-200 mb-4" size={48} />
+                      <p className="text-gray-400 font-bold">No products yet.</p>
+                  </div>
+              ) : sellerProducts.map((p) => (
                 <div key={p.id} className="bg-white rounded-[32px] p-5 border border-gray-100 shadow-soft flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="relative">
-                      <img src={p.image} className="w-16 h-16 rounded-2xl object-cover" />
+                      <img src={p.imageUrl} alt={p.productName} className="w-16 h-16 rounded-2xl object-cover" />
                       <div className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-black px-2 py-1 rounded-lg shadow-sm">LIVE</div>
                     </div>
                     <div>
-                      <h3 className="font-black text-gray-800 tracking-tight">{p.name}</h3>
+                      <h3 className="font-black text-gray-800 tracking-tight">{p.productName}</h3>
                       <p className="text-xs text-primary font-bold">D{p.price} / {p.unit}</p>
                       <div className="flex gap-2 mt-2">
-                        <span className="text-[8px] font-black text-gray-400 uppercase bg-gray-50 border border-gray-100 px-2 py-0.5 rounded">Stock: 45kg</span>
+                        <span className="text-[8px] font-black text-gray-400 uppercase bg-gray-50 border border-gray-100 px-2 py-0.5 rounded">Stock: {p.stockQuantity}</span>
                       </div>
                     </div>
                   </div>
@@ -129,6 +185,14 @@ export default function SellerDashboard() {
                     <button
                       onClick={() => {
                         setEditingProduct(p);
+                        setProductForm({
+                          productName: p.productName,
+                          price: p.price,
+                          unit: p.unit,
+                          category: p.category,
+                          description: p.description,
+                          stockQuantity: p.stockQuantity
+                        });
                         setIsAddModalOpen(true);
                       }}
                       className="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-primary/5 hover:text-primary transition-colors"
@@ -136,7 +200,7 @@ export default function SellerDashboard() {
                       <Edit size={16} />
                     </button>
                     <button
-                      onClick={() => setSellerProducts(prev => prev.filter(item => item.id !== p.id))}
+                      onClick={() => firebaseService.deleteProduct(p.id)}
                       className="w-10 h-10 rounded-xl bg-red-50 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
                     ><Trash2 size={16} /></button>
                   </div>
@@ -154,23 +218,10 @@ export default function SellerDashboard() {
               className="flex flex-col gap-4"
             >
               <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Recent Transactions</h2>
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white rounded-[32px] p-6 border border-gray-100 shadow-soft">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">ORD-772{i}</p>
-                      <h3 className="font-black text-gray-800 tracking-tight">Today, 14:2{i}</h3>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-lg font-black text-green-600">D{(450 + i*50)}</span>
-                    </div>
-                  </div>
-                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest border-t border-gray-50 pt-4 flex justify-between items-center">
-                    <span>Items: 5kg Tomatoes, 2kg Onions</span>
-                    <span className="text-blue-500 bg-blue-50 px-2 py-1 rounded-lg font-black">PAID</span>
-                  </div>
-                </div>
-              ))}
+              <div className="bg-white rounded-[32px] p-10 text-center border border-dashed border-gray-200">
+                  <DollarSign className="mx-auto text-gray-200 mb-4" size={48} />
+                  <p className="text-gray-400 font-bold">No sales recorded yet.</p>
+              </div>
             </motion.div>
           )}
 
@@ -189,18 +240,6 @@ export default function SellerDashboard() {
               <p className="text-sm text-gray-400 font-bold mb-8 leading-relaxed px-4">
                 Detailed charts and sales trends will be available once your garden completes 10 sales.
               </p>
-              <div className="flex flex-col gap-4 text-left">
-                {[
-                  { label: 'Profile Visits', val: '+24%', color: 'text-green-500' },
-                  { label: 'Conversion Rate', val: '12.5%', color: 'text-blue-500' },
-                  { label: 'Popular Time', val: 'Sat 10am', color: 'text-orange-500' },
-                ].map((s, idx) => (
-                  <div key={idx} className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl">
-                    <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest">{s.label}</span>
-                    <span className={cn("font-black", s.color)}>{s.val}</span>
-                  </div>
-                ))}
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -215,7 +254,7 @@ export default function SellerDashboard() {
               </div>
               <div>
                 <p className="text-xs font-black text-gray-800">WhatsApp Number</p>
-                <p className="text-[10px] font-bold text-gray-400">+220 333 4444</p>
+                <p className="text-[10px] font-bold text-gray-400">{user?.phoneNumber || '+220 333 4444'}</p>
               </div>
             </div>
             <button className="text-[10px] font-black text-primary uppercase tracking-widest">Update</button>
@@ -249,15 +288,20 @@ export default function SellerDashboard() {
 
               <form onSubmit={handleAddProduct} className="p-8 overflow-y-auto">
                 <div className="flex flex-col gap-6">
-                  {/* Image Upload Simulation */}
-                  <div className="aspect-video bg-gray-50 rounded-[32px] border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 text-gray-400 group hover:border-primary/30 transition-colors cursor-pointer overflow-hidden relative">
-                    {editingProduct ? (
-                      <img src={editingProduct.image} className="w-full h-full object-cover opacity-50" />
+                  {/* Image Upload */}
+                  <label className="aspect-video bg-gray-50 rounded-[32px] border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 text-gray-400 group hover:border-primary/30 transition-colors cursor-pointer overflow-hidden relative">
+                    {imageFile ? (
+                      <img src={URL.createObjectURL(imageFile)} alt="Preview" className="w-full h-full object-cover" />
+                    ) : editingProduct ? (
+                      <img src={editingProduct.imageUrl} alt="Current" className="w-full h-full object-cover opacity-50" />
                     ) : <ImageIcon size={32} />}
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/40 backdrop-blur-[2px]">
-                      <span className="text-[10px] font-black uppercase tracking-widest bg-white px-4 py-2 rounded-xl shadow-sm">Upload Product Image</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest bg-white px-4 py-2 rounded-xl shadow-sm">
+                        {imageFile ? 'Change Image' : 'Upload Product Image'}
+                      </span>
                     </div>
-                  </div>
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
+                  </label>
 
                   <div className="flex flex-col gap-4">
                     <div>
@@ -265,7 +309,8 @@ export default function SellerDashboard() {
                       <input
                         required
                         type="text"
-                        defaultValue={editingProduct?.name || ''}
+                        value={productForm.productName}
+                        onChange={(e) => setProductForm({...productForm, productName: e.target.value})}
                         placeholder="e.g. Fresh Red Tomatoes"
                         className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-primary/20"
                       />
@@ -277,7 +322,8 @@ export default function SellerDashboard() {
                         <input
                           required
                           type="number"
-                          defaultValue={editingProduct?.price || ''}
+                          value={productForm.price}
+                          onChange={(e) => setProductForm({...productForm, price: Number(e.target.value)})}
                           placeholder="0"
                           className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-primary/20"
                         />
@@ -287,6 +333,8 @@ export default function SellerDashboard() {
                         <input
                           required
                           type="text"
+                          value={productForm.stockQuantity}
+                          onChange={(e) => setProductForm({...productForm, stockQuantity: e.target.value})}
                           placeholder="e.g. 50kg"
                           className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-primary/20"
                         />
@@ -294,9 +342,26 @@ export default function SellerDashboard() {
                     </div>
 
                     <div>
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Category</label>
+                      <select
+                        value={productForm.category}
+                        onChange={(e) => setProductForm({...productForm, category: e.target.value})}
+                        className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-primary/20"
+                      >
+                        <option>Vegetables</option>
+                        <option>Fruits</option>
+                        <option>Fish</option>
+                        <option>Spices</option>
+                        <option>Bread</option>
+                      </select>
+                    </div>
+
+                    <div>
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Description</label>
                       <textarea
                         rows={3}
+                        value={productForm.description}
+                        onChange={(e) => setProductForm({...productForm, description: e.target.value})}
                         placeholder="Tell buyers about your product's freshness..."
                         className="w-full bg-gray-50 border-none rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-primary/20"
                       />
@@ -305,8 +370,10 @@ export default function SellerDashboard() {
 
                   <button
                     type="submit"
-                    className="w-full py-5 bg-primary text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 active:scale-[0.98] transition-all mt-4 mb-8"
+                    disabled={loading}
+                    className="w-full py-5 bg-primary text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 active:scale-[0.98] transition-all mt-4 mb-8 flex items-center justify-center gap-2"
                   >
+                    {loading && <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                     {editingProduct ? 'Save Changes' : 'Publish Product'}
                   </button>
                 </div>

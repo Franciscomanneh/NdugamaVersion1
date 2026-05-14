@@ -3,26 +3,33 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Search, ChevronRight, Plus, MapPin, Heart } from 'lucide-react';
-import { categories, gardeners, bundles, products } from '@/data/mock';
 import { useAppContext } from '@/context/AppContext';
 import { motion } from 'framer-motion';
 import { DonationModal } from '@/components/DonationModal';
 
 export default function HomePage() {
-  const { location, setLocation, addToCart, favorites, toggleFavorite } = useAppContext();
+  const { location, setLocation, addToCart, favorites, toggleFavorite, products, bundles, sellers } = useAppContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
 
   const locations = ['Banjul', 'Serrekunda', 'Brikama', 'Bakau'];
 
   const filteredBundles = bundles.filter(b =>
-    b.name.toLowerCase().includes(searchQuery.toLowerCase())
+    b.bundleName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const categories = [
+    { id: '1', name: 'Vegetables', icon: '🥕' },
+    { id: '2', name: 'Fruits', icon: '🍎' },
+    { id: '3', name: 'Fish', icon: '🐟' },
+    { id: '4', name: 'Spices', icon: '🌶️' },
+    { id: '5', name: 'Bread', icon: '🥖' },
+  ];
 
   return (
     <div className="flex flex-col gap-8 pb-10">
@@ -122,24 +129,24 @@ export default function HomePage() {
           <h3 className="text-lg font-bold">Featured Gardeners</h3>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-4">
-          {gardeners.filter(g => g.isFeatured).slice(0, 4).map((g) => (
+          {sellers.filter(s => s.featuredStatus).slice(0, 4).map((s) => (
             <Link
-              href={`/gardener/${g.id}`}
-              key={g.id}
+              href={`/gardener/${s.id}`}
+              key={s.id}
               className="p-3 rounded-2xl bg-white border border-gray-100 shadow-soft active:scale-[0.98] transition-transform"
             >
-              <img src={g.image} alt={g.name} className="w-full h-24 object-cover rounded-xl mb-3" />
-              <h4 className="font-bold text-sm truncate">{g.garden}</h4>
+              <img src={s.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"} alt={s.name} className="w-full h-24 object-cover rounded-xl mb-3" />
+              <h4 className="font-bold text-sm truncate">{s.name}</h4>
               <p className="text-[10px] text-gray-500 mb-2 flex items-center gap-1">
-                <MapPin size={10} /> {g.location}
+                <MapPin size={10} /> {s.location}
               </p>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] text-gray-400">Featured</p>
-                  <p className="text-[11px] font-bold text-primary">{g.featuredProduct}</p>
+                  <p className="text-[10px] text-gray-400">Top Seller</p>
+                  <p className="text-[11px] font-bold text-primary">{s.location}</p>
                 </div>
                 <div className="text-[10px] font-bold bg-green-50 text-primary px-1.5 py-0.5 rounded">
-                  {g.price.split(' ')[0]}
+                  TOP
                 </div>
               </div>
             </Link>
@@ -166,22 +173,22 @@ export default function HomePage() {
           {filteredBundles.map((bundle) => (
             <div key={bundle.id} className="min-w-[280px] rounded-3xl overflow-hidden bg-white border border-gray-100 shadow-soft relative group">
               <Link href={`/bundle/${bundle.id}`}>
-                <img src={bundle.image} alt={bundle.name} className="w-full h-40 object-cover" />
+                <img src={bundle.bundleImage} alt={bundle.bundleName} className="w-full h-40 object-cover" />
               </Link>
               <div className="p-4">
                 <Link href={`/bundle/${bundle.id}`}>
-                  <h4 className="font-bold text-lg mb-1">{bundle.name}</h4>
+                  <h4 className="font-bold text-lg mb-1">{bundle.bundleName}</h4>
                 </Link>
                 <div className="flex flex-wrap gap-1 mb-3">
-                  {bundle.ingredients.slice(0, 3).map((ing, i) => (
+                  {bundle.ingredients.slice(0, 3).map((ing: any, i: number) => (
                     <span key={i} className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
                       {ing.name}
                     </span>
                   ))}
-                  <span className="text-[10px] text-gray-400">+{bundle.ingredients.length - 3} more</span>
+                  {bundle.ingredients.length > 3 && <span className="text-[10px] text-gray-400">+{bundle.ingredients.length - 3} more</span>}
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-primary text-xl">D{bundle.price}</span>
+                  <span className="font-bold text-primary text-xl">D{bundle.totalPrice}</span>
                   <button
                     onClick={() => addToCart(bundle, 'bundle')}
                     className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg active:scale-90 transition-transform"
@@ -208,7 +215,7 @@ export default function HomePage() {
             <div key={p.id} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-soft group">
               <div className="relative h-32 w-full overflow-hidden">
                 <Link href={`/product/${p.id}`}>
-                  <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                  <img src={p.imageUrl} alt={p.productName} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                 </Link>
                 <button
                   onClick={() => toggleFavorite(p.id)}
@@ -225,7 +232,7 @@ export default function HomePage() {
               </div>
               <div className="p-3">
                 <Link href={`/product/${p.id}`}>
-                  <h4 className="text-sm font-bold truncate">{p.name}</h4>
+                  <h4 className="text-sm font-bold truncate">{p.productName}</h4>
                   <p className="text-lg font-bold text-primary">D{p.price}<span className="text-xs text-gray-400 font-normal"> / {p.unit}</span></p>
                 </Link>
               </div>

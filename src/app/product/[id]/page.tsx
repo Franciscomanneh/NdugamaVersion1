@@ -2,21 +2,20 @@
 
 import React, { useState, use } from 'react';
 import { ChevronLeft, Minus, Plus, Heart, ShoppingBag, ShieldCheck, Truck, Info, History } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { products } from '@/data/mock';
-import { notFound } from 'next/navigation';
+import { useRouter, notFound } from 'next/navigation';
 import { useAppContext } from '@/context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ProductDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const { addToCart, favorites, toggleFavorite } = useAppContext();
+  const { addToCart, favorites, toggleFavorite, products, loading } = useAppContext();
 
   const product = products.find(p => p.id === id);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
+  if (loading) return null;
   if (!product) notFound();
 
   const handleAddToCart = () => {
@@ -25,7 +24,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
     setTimeout(() => setAdded(false), 2000);
   };
 
-  const relatedProducts = products.filter(p => product.relatedProductIds.includes(p.id));
+  const relatedProducts = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
 
   return (
     <div className="bg-white min-h-screen pb-32">
@@ -47,7 +46,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
 
       {/* Image */}
       <div className="h-[400px] w-full rounded-b-[40px] overflow-hidden shadow-lg">
-        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+        <img src={product.imageUrl} alt={product.productName} className="w-full h-full object-cover" />
       </div>
 
       {/* Content */}
@@ -57,7 +56,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
             <span className="text-primary font-bold text-[10px] bg-green-50 px-3 py-1 rounded-full uppercase tracking-widest">
               {product.category}
             </span>
-            <h1 className="text-2xl font-black mt-2 text-gray-800">{product.name}</h1>
+            <h1 className="text-2xl font-black mt-2 text-gray-800">{product.productName}</h1>
           </div>
           <div className="text-right">
             <p className="text-3xl font-black text-primary">D{product.price}</p>
@@ -68,20 +67,10 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
         <section className="flex flex-col gap-3">
           <div className="flex items-center gap-2 text-primary">
             <Info size={18} />
-            <h3 className="font-bold">Freshness Details</h3>
+            <h3 className="font-bold">Details</h3>
           </div>
           <p className="text-gray-500 text-sm leading-relaxed">
-            {product.freshnessDescription}
-          </p>
-        </section>
-
-        <section className="flex flex-col gap-3">
-          <div className="flex items-center gap-2 text-primary">
-            <History size={18} />
-            <h3 className="font-bold">Storage Instructions</h3>
-          </div>
-          <p className="text-gray-500 text-sm leading-relaxed">
-            {product.storageInstructions}
+            {product.description || 'Fresh products from local Gambian gardens.'}
           </p>
         </section>
 
@@ -138,8 +127,8 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
                   onClick={() => router.push(`/product/${p.id}`)}
                   className="min-w-[140px] bg-white rounded-2xl border border-gray-100 shadow-soft p-2 text-left active:scale-95 transition-transform"
                 >
-                  <img src={p.image} alt={p.name} className="w-full h-24 object-cover rounded-xl mb-2" />
-                  <p className="text-[11px] font-bold truncate px-1">{p.name}</p>
+                  <img src={p.imageUrl} alt={p.productName} className="w-full h-24 object-cover rounded-xl mb-2" />
+                  <p className="text-[11px] font-bold truncate px-1">{p.productName}</p>
                   <p className="text-[11px] text-primary font-bold px-1">D{p.price}</p>
                 </button>
               ))}

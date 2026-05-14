@@ -1,22 +1,23 @@
 'use client';
 
 import React, { use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, notFound } from 'next/navigation';
 import { ChevronLeft, MapPin, MessageCircle, ShoppingBag, Info, Phone } from 'lucide-react';
-import { gardeners } from '@/data/mock';
-import { motion } from 'framer-motion';
+import { useAppContext } from '@/context/AppContext';
 
 export default function GardenerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const gardener = gardeners.find(g => g.id === id);
+  const { sellers, loading } = useAppContext();
+  const gardener = sellers.find(g => g.id === id);
 
-  if (!gardener) return <div>Gardener not found</div>;
+  if (loading) return null;
+  if (!gardener) notFound();
 
   return (
     <div className="bg-white min-h-screen pb-24">
       <div className="relative h-72 w-full">
-        <img src={gardener.image} alt={gardener.name} className="w-full h-full object-cover" />
+        <img src={gardener.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"} alt={gardener.name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <button
           onClick={() => router.back()}
@@ -25,7 +26,7 @@ export default function GardenerDetailPage({ params }: { params: Promise<{ id: s
           <ChevronLeft size={24} />
         </button>
         <div className="absolute bottom-6 left-6 right-6 text-white">
-          <h1 className="text-2xl font-bold mb-1">{gardener.garden}</h1>
+          <h1 className="text-2xl font-bold mb-1">{gardener.name}</h1>
           <p className="text-white/80 flex items-center gap-1 text-sm">
             <MapPin size={14} /> {gardener.location}
           </p>
@@ -36,7 +37,7 @@ export default function GardenerDetailPage({ params }: { params: Promise<{ id: s
         <section className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20">
-              <img src={gardener.image} alt={gardener.name} className="w-full h-full object-cover" />
+              <img src={gardener.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"} alt={gardener.name} className="w-full h-full object-cover" />
             </div>
             <div>
               <h2 className="font-bold">{gardener.name}</h2>
@@ -45,13 +46,13 @@ export default function GardenerDetailPage({ params }: { params: Promise<{ id: s
           </div>
           <div className="flex gap-2">
             <a
-              href={`tel:${gardener.whatsapp}`}
+              href={`tel:${gardener.whatsappNumber}`}
               className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600"
             >
               <Phone size={18} />
             </a>
             <a
-              href={`https://wa.me/${gardener.whatsapp.replace('+', '')}`}
+              href={`https://wa.me/${gardener.whatsappNumber.replace('+', '').replace(' ', '')}`}
               className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white shadow-lg shadow-green-500/30"
             >
               <MessageCircle size={18} />
@@ -65,7 +66,7 @@ export default function GardenerDetailPage({ params }: { params: Promise<{ id: s
             <h3 className="font-bold">About the Garden</h3>
           </div>
           <p className="text-sm text-gray-600 leading-relaxed">
-            {gardener.about}
+            {gardener.bio || 'A dedicated community garden in The Gambia.'}
           </p>
         </section>
 
@@ -75,17 +76,7 @@ export default function GardenerDetailPage({ params }: { params: Promise<{ id: s
             <h3 className="font-bold">Bulk Products Available</h3>
           </div>
           <div className="flex flex-col gap-3">
-            {gardener.bulkProducts.map((p, i) => (
-              <div key={i} className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                <div>
-                  <h4 className="font-bold text-sm">{p.name}</h4>
-                  <p className="text-[10px] text-gray-400">Sold by {p.unit}</p>
-                </div>
-                <div className="text-primary font-bold">
-                  D{p.price}
-                </div>
-              </div>
-            ))}
+             <p className="text-xs text-gray-400 italic">Please contact the gardener directly for bulk listings.</p>
           </div>
         </section>
 

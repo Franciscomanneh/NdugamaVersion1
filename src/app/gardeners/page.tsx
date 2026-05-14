@@ -3,15 +3,18 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, MapPin, MessageCircle } from 'lucide-react';
-import { gardeners } from '@/data/mock';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { useAppContext } from '@/context/AppContext';
 
 export default function GardenersPage() {
   const router = useRouter();
+  const { sellers, loading } = useAppContext();
 
-  const featured = gardeners.filter(g => g.isFeatured).slice(0, 10);
-  const nonFeatured = gardeners.filter(g => !g.isFeatured).slice(0, 5);
+  const featured = sellers.filter(g => g.featuredStatus).slice(0, 10);
+  const nonFeatured = sellers.filter(g => !g.featuredStatus).slice(0, 5);
+
+  if (loading) return null;
 
   return (
     <div className="bg-white min-h-screen pb-24">
@@ -62,8 +65,8 @@ function GardenerCard({ gardener }: { gardener: any }) {
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-soft overflow-hidden flex h-32">
       <Link href={`/gardener/${gardener.id}`} className="w-1/3 relative h-full">
-        <img src={gardener.image} alt={gardener.name} className="w-full h-full object-cover" />
-        {gardener.isFeatured && (
+        <img src={gardener.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"} alt={gardener.name} className="w-full h-full object-cover" />
+        {gardener.featuredStatus && (
           <div className="absolute top-2 left-2 bg-primary text-white text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest">
             Featured
           </div>
@@ -72,8 +75,8 @@ function GardenerCard({ gardener }: { gardener: any }) {
       <div className="w-2/3 p-4 flex flex-col justify-between">
         <Link href={`/gardener/${gardener.id}`}>
           <div>
-            <h3 className="font-bold text-sm leading-tight mb-1">{gardener.garden}</h3>
-            <p className="text-xs text-gray-400 mb-1">{gardener.name}</p>
+            <h3 className="font-bold text-sm leading-tight mb-1">{gardener.name}</h3>
+            <p className="text-xs text-gray-400 mb-1">Verified Gardener</p>
             <div className="flex items-center gap-1 text-[10px] text-gray-500">
               <MapPin size={10} /> {gardener.location}
             </div>
@@ -81,10 +84,10 @@ function GardenerCard({ gardener }: { gardener: any }) {
         </Link>
         <div className="flex items-center justify-between mt-2">
           <div className="text-[10px] font-bold text-primary">
-            {gardener.featuredProduct}
+            Fresh Produce
           </div>
           <a
-            href={`https://wa.me/${gardener.whatsapp.replace('+', '')}`}
+            href={`https://wa.me/${gardener.whatsappNumber?.replace('+', '').replace(' ', '')}`}
             className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center active:scale-90 transition-transform"
           >
             <MessageCircle size={16} />
