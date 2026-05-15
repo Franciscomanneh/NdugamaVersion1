@@ -258,11 +258,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('dugama_location', location);
   }, [location]);
 
-  const logout = async () => {
+  // Optimization: Stable references for context functions to prevent unnecessary consumer re-renders
+  const logout = React.useCallback(async () => {
     await firebaseService.logoutUser();
-  };
+  }, []);
 
-  const addToCart = (item: any, type: 'product' | 'bundle', quantity: number = 1, customizedIngredients?: any[]) => {
+  const addToCart = React.useCallback((item: any, type: 'product' | 'bundle', quantity: number = 1, customizedIngredients?: any[]) => {
     setCart(prev => {
       if (type === 'product') {
         const existing = prev.find(i => i.id === item.id && i.type === 'product');
@@ -280,13 +281,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ingredients: customizedIngredients
       }];
     });
-  };
+  }, []);
 
-  const removeFromCart = (id: string) => {
+  const removeFromCart = React.useCallback((id: string) => {
     setCart(prev => prev.filter(i => i.id !== id));
-  };
+  }, []);
 
-  const updateQuantity = (id: string, delta: number) => {
+  const updateQuantity = React.useCallback((id: string, delta: number) => {
     setCart(prev => prev.map(i => {
       if (i.id === id) {
         const newQty = Math.max(1, i.quantity + delta);
@@ -294,43 +295,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return i;
     }));
-  };
+  }, []);
 
-  const clearCart = () => setCart([]);
+  const clearCart = React.useCallback(() => setCart([]), []);
 
-  const addOrder = async (orderData: any) => {
+  const addOrder = React.useCallback(async (orderData: any) => {
     await firebaseService.createOrder(orderData);
-  };
+  }, []);
 
-  const updateOrderStatus = async (id: string, status: string) => {
+  const updateOrderStatus = React.useCallback(async (id: string, status: string) => {
     await firebaseService.updateOrderStatus(id, status);
-  };
+  }, []);
 
-  const markOrderCompleted = async (id: string) => {
+  const markOrderCompleted = React.useCallback(async (id: string) => {
     await firebaseService.updateOrderStatus(id, "Delivered Successfully");
-  };
+  }, []);
 
-  const toggleFavorite = (id: string) => {
+  const toggleFavorite = React.useCallback((id: string) => {
     setFavorites(prev => prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]);
-  };
+  }, []);
 
-  const addAddress = (addr: Address) => setAddresses(prev => [...prev, addr]);
+  const addAddress = React.useCallback((addr: Address) => setAddresses(prev => [...prev, addr]), []);
 
-  const setDefaultPayment = (id: string) => {
+  const setDefaultPayment = React.useCallback((id: string) => {
     setPaymentMethods(prev => prev.map(m => ({ ...m, isDefault: m.id === id })));
-  };
+  }, []);
+
+  // Optimization: Memoize context value to prevent all consumers from re-rendering
+  // on every AppProvider render unless a dependency actually changes.
+  const contextValue = React.useMemo(() => ({
+    user, loading, isLoggedIn: !!user, logout,
+    cart, addToCart, removeFromCart, updateQuantity, clearCart,
+    location, setLocation,
+    favorites, toggleFavorite,
+    products, bundles, sellers, orders,
+    addOrder, updateOrderStatus, markOrderCompleted,
+    addresses, addAddress,
+    paymentMethods, setDefaultPayment
+  }), [
+    user, loading, cart, location, favorites, products, bundles, sellers, orders,
+    logout, addToCart, removeFromCart, updateQuantity, clearCart,
+    setLocation, toggleFavorite, addOrder, updateOrderStatus, markOrderCompleted,
+    addresses, addAddress, paymentMethods, setDefaultPayment
+  ]);
 
   return (
-    <AppContext.Provider value={{
-      user, loading, isLoggedIn: !!user, logout,
-      cart, addToCart, removeFromCart, updateQuantity, clearCart,
-      location, setLocation,
-      favorites, toggleFavorite,
-      products, bundles, sellers, orders,
-      addOrder, updateOrderStatus, markOrderCompleted,
-      addresses, addAddress,
-      paymentMethods, setDefaultPayment
-    }}>
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );
