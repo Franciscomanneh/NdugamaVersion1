@@ -1,0 +1,3 @@
+## 2025-05-15 - Context Memoization for Performance
+**Learning:** In a centralized state management system using React Context (like `AppContext`), any state change in the provider causes all consumer components to re-render if the context value is an object literal created on every render. Even components that only use stable functions from the context are forced to re-render.
+**Action:** Always wrap the context `value` object in `useMemo` and stabilize all provided functions with `useCallback`. This ensures that a component only re-renders if the specific state it consumes actually changes, significantly reducing the re-render surface area of the application.
