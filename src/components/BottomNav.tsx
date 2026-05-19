@@ -15,7 +15,12 @@ const navItems = [
   { label: 'Profile', icon: User, href: '/profile' },
 ];
 
-export function BottomNav() {
+/**
+ * PERFORMANCE: BottomNav is wrapped in React.memo to prevent unnecessary re-renders.
+ * Since context values are now stabilized, this component will only re-render
+ * when the specific consumed context (cart) or routing (pathname) changes.
+ */
+export const BottomNav = React.memo(function BottomNav() {
   const pathname = usePathname();
   const { cart } = useAppContext();
 
@@ -50,4 +55,4 @@ export function BottomNav() {
       })}
     </nav>
   );
-}
+});
