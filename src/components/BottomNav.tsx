@@ -15,7 +15,7 @@ const navItems = [
   { label: 'Profile', icon: User, href: '/profile' },
 ];
 
-export function BottomNav() {
+export const BottomNav = React.memo(function BottomNav() {
   const pathname = usePathname();
   const { cart } = useAppContext();
 
@@ -50,4 +50,4 @@ export function BottomNav() {
       })}
     </nav>
   );
-}
+});
