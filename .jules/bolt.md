@@ -1,0 +1,3 @@
+## 2026-05-21 - [Context Memoization]
+**Learning:** In a large React application using a single global Context (AppContext), failing to memoize the context value and its functions causes a global re-render cascade on every state update (e.g., adding an item to the cart, toggling a favorite). Even if a component only consumes one piece of state, it will re-render because the provider's 'value' object identity changes.
+**Action:** Always memoize the Provider value with useMemo and stabilize functions with useCallback using the functional update pattern (prev => ...) to avoid dependency-triggered reference changes.
