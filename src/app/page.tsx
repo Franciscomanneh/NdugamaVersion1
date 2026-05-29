@@ -1,35 +1,43 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Search, ChevronRight, Plus, MapPin, Heart } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { motion } from 'framer-motion';
 import { DonationModal } from '@/components/DonationModal';
 
+const LOCATIONS = ['Banjul', 'Serrekunda', 'Brikama', 'Bakau'];
+
+const CATEGORIES = [
+  { id: '1', name: 'Vegetables', icon: '🥕' },
+  { id: '2', name: 'Fruits', icon: '🍎' },
+  { id: '3', name: 'Fish', icon: '🐟' },
+  { id: '4', name: 'Spices', icon: '🌶️' },
+  { id: '5', name: 'Bread', icon: '🥖' },
+];
+
 export default function HomePage() {
   const { location, setLocation, addToCart, favorites, toggleFavorite, products, bundles, sellers } = useAppContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
 
-  const locations = ['Banjul', 'Serrekunda', 'Brikama', 'Bakau'];
+  // Optimization: Memoize filtered lists to prevent expensive recalculations on every re-render.
+  // This is especially beneficial when toggling UI states (like the donation modal) that don't affect search.
+  const filteredBundles = useMemo(() => {
+    const query = searchQuery.toLowerCase();
+    return bundles.filter(b =>
+      b.bundleName.toLowerCase().includes(query)
+    );
+  }, [bundles, searchQuery]);
 
-  const filteredBundles = bundles.filter(b =>
-    b.bundleName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const filteredProducts = products.filter(p =>
-    p.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const categories = [
-    { id: '1', name: 'Vegetables', icon: '🥕' },
-    { id: '2', name: 'Fruits', icon: '🍎' },
-    { id: '3', name: 'Fish', icon: '🐟' },
-    { id: '4', name: 'Spices', icon: '🌶️' },
-    { id: '5', name: 'Bread', icon: '🥖' },
-  ];
+  const filteredProducts = useMemo(() => {
+    const query = searchQuery.toLowerCase();
+    return products.filter(p =>
+      p.productName.toLowerCase().includes(query) ||
+      p.category.toLowerCase().includes(query)
+    );
+  }, [products, searchQuery]);
 
   return (
     <div className="flex flex-col gap-8 pb-10">
@@ -62,7 +70,7 @@ export default function HomePage() {
             className="bg-transparent text-[9px] font-black focus:outline-none appearance-none pr-3 cursor-pointer truncate uppercase tracking-tight"
             style={{ backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%228%22%20height%3D%228%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right center' }}
           >
-            {locations.map(loc => (
+            {LOCATIONS.map(loc => (
               <option key={loc} value={loc}>{loc}</option>
             ))}
           </select>
@@ -107,7 +115,7 @@ export default function HomePage() {
             <h3 className="text-lg font-bold">Categories</h3>
           </div>
           <div className="flex gap-4 overflow-x-auto px-6 hide-scrollbar pb-2">
-            {categories.map((cat) => (
+            {CATEGORIES.map((cat) => (
               <Link
                 key={cat.id}
                 href={`/market?category=${cat.name}`}
