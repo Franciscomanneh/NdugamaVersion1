@@ -1,13 +1,13 @@
 "use client";
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, ShoppingBag, ShoppingCart, ClipboardList, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppContext } from '@/context/AppContext';
 
-const navItems = [
+const NAV_ITEMS = [
   { label: 'Home', icon: Home, href: '/' },
   { label: 'Market', icon: ShoppingBag, href: '/market' },
   { label: 'Cart', icon: ShoppingCart, href: '/cart' },
@@ -19,11 +19,14 @@ export function BottomNav() {
   const pathname = usePathname();
   const { cart } = useAppContext();
 
-  const cartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+  // Memoize cart count to avoid recalculation on unrelated re-renders
+  const cartItemCount = useMemo(() => {
+    return cart.reduce((acc, item) => acc + item.quantity, 0);
+  }, [cart]);
 
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t border-gray-100 px-6 py-3 flex justify-between items-center z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
-      {navItems.map((item) => {
+      {NAV_ITEMS.map((item) => {
         const isActive = pathname === item.href;
         const Icon = item.icon;
 
