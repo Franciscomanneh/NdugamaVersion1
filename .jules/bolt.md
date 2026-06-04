@@ -1,0 +1,3 @@
+## 2025-05-14 - [AppContext and HomePage Optimizations]
+**Learning:** In a context-heavy application, failing to memoize the context provider's value object and its functions triggers a cascade of re-renders across the entire component tree whenever any piece of global state (like a timer or auth status) changes. Additionally, repetitive filtering of large data sets (products, bundles) within components without memoization leads to dropped frames during UI interactions.
+**Action:** Always wrap context provider values in `useMemo` and constituent functions in `useCallback`. Ensure all derived data in components (filtered lists, sorted results) are wrapped in `useMemo` with minimal dependency arrays.
