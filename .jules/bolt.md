@@ -1,0 +1,3 @@
+## 2025-05-15 - Global Re-render Cascades in AppContext
+**Learning:** AppContext.tsx lacked memoization for its provider value and internal functions. Since AppContext wraps the entire application, any state change (even a small one like updating location or adding a favorite) caused the provider's value object to be recreated, triggering a re-render of EVERY component consuming the context, even if the specific data they used didn't change.
+**Action:** Always memoize context provider values with `useMemo` and context functions with `useCallback` to ensure that only components consuming the changed parts of the state re-render.
