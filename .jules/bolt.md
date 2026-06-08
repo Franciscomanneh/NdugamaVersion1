@@ -1,0 +1,3 @@
+## 2026-06-08 - Memoization of Global Context and Static Data
+**Learning:** In a React application using a large global context, every update to any context state causes all consumer components to re-render if the context value is a new object literal. Wrapping context functions in `useCallback` and the provider value in `useMemo` is a critical optimization to prevent global re-render cascades. Additionally, moving static arrays outside of component functions is a simple but effective way to avoid redundant re-allocations.
+**Action:** Always memoize global context values and wrap context-provided functions in `useCallback`. Move static, non-reactive data outside of React components.
