@@ -1,0 +1,3 @@
+## 2025-05-15 - [Global State & Context Optimization]
+**Learning:** In a React application using the Context API (like `AppContext.tsx`), failing to memoize the provider's `value` object and its functions results in a global re-render cascade across the entire component tree whenever any state within the provider changes. Even if a component only consumes a stable piece of state, it will re-render because the context value reference changes.
+**Action:** Always wrap context functions in `useCallback` (using functional state updates to keep dependencies stable) and memoize the context provider's `value` object with `useMemo`. Ensure static data arrays are defined outside of components to prevent redundant re-allocations.
