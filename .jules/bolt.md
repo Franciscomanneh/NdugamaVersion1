@@ -1,0 +1,3 @@
+## 2025-05-15 - Optimizing Landing Page Performance
+**Learning:** The Home page (`src/app/page.tsx`) was a major performance bottleneck due to static arrays being redefined on every render and heavy filtering operations running on every state change (e.g., opening a modal). Additionally, using standard `img` tags for hero banners missed out on Next.js's automatic image optimization and LCP improvements.
+**Action:** Always hoist static constants outside of components and use `useMemo` for filtering logic derived from context state. Prioritize Next.js `<Image>` for hero sections with `priority` and `fill` props to optimize LCP.
