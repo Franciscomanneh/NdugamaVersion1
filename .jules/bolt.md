@@ -1,0 +1,3 @@
+## 2026-06-19 - [Stable Context Provider Patterns]
+**Learning:** In global contexts like `AppContext`, using functional state updates (e.g., `setCart(prev => ...)`) within `useCallback` allows for empty dependency arrays. This keeps function references stable across all re-renders of the provider, which is critical for preventing unnecessary re-render cascades in all consumer components when combined with a memoized provider value.
+**Action:** Always prioritize functional state updates in Context-level functions to maintain stable references and minimize re-render triggers across the component tree.
