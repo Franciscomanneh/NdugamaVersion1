@@ -1,0 +1,3 @@
+## 2026-06-20 - [Optimizing HomePage LCP and Rendering]
+**Learning:** In Next.js 15, standard <img> tags for above-the-fold content like Hero sections are a missed opportunity for LCP optimization. Replacing them with <Image /> and the 'priority' prop significantly improves perceived load performance. Additionally, hoisting static constants and memoizing derived state (filtered lists) in components that consume global context (like AppContext) prevents redundant computations and object allocations during unrelated context updates (e.g., cart changes).
+**Action:** Always audit the Hero section for <img> tags and apply Next.js Image optimization. Use useMemo for all filter/sort operations in pages that share a global context to isolate re-renders.
