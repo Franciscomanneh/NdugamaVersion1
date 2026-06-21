@@ -1,0 +1,3 @@
+## 2025-05-22 - Optimizing Home Page LCP and Render Performance
+**Learning:** In Next.js 15, standard <img> tags for above-the-fold content like Hero banners are a major LCP bottleneck. Replacing them with <Image /> using the 'priority' prop ensures preloading and proper sizing. Additionally, in components with multiple state hooks (search, modals), memoizing filtered lists with useMemo prevents unnecessary array traversals on every render.
+**Action:** Always audit above-the-fold images for 'priority' optimization and ensure lists derived from context or state are memoized when the component has high-frequency updates.
