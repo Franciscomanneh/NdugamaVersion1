@@ -1,0 +1,3 @@
+## 2025-06-22 - Global Context Memoization Pattern
+**Learning:** In applications using a centralized "God Context" (like AppContext for auth, cart, and products), every state change triggers a re-render of all consuming components unless the context value is memoized. Stable function references are equally important for components using `React.memo` or hooks with these functions as dependencies.
+**Action:** Always memoize global context provider values with `useMemo`. Use `useCallback` with the functional update pattern (`setState(prev => ...)`) for context functions to keep their dependency arrays empty and references stable.
