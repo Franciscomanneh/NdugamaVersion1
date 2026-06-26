@@ -1,0 +1,3 @@
+## 2025-05-14 - Context Re-render Cascade Prevention
+**Learning:** In large Next.js applications, passing a new object literal to a global Context Provider causes every consumer to re-render on every state update. Using `useCallback` with functional state updates (e.g., `setCart(prev => ...)`) allows context functions to have stable identities (empty dependency arrays), which, combined with a memoized context value via `useMemo`, prevents massive re-render cascades.
+**Action:** Always memoize the value object in global providers and ensure all functions are wrapped in `useCallback` with the most stable dependency arrays possible.
