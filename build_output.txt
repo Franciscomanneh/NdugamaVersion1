@@ -1,0 +1,81 @@
+
+> tmp-app@0.1.0 build
+> next build
+
+   ▲ Next.js 15.1.0
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+./src/app/cart/page.tsx
+5:8  Warning: 'Link' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/gardener-application/page.tsx
+5:82  Warning: 'ImageIcon' is defined but never used.  @typescript-eslint/no-unused-vars
+170:34  Warning: img elements must have an alt prop, either with meaningful text, or an empty string for decorative images.  jsx-a11y/alt-text
+179:33  Warning: img elements must have an alt prop, either with meaningful text, or an empty string for decorative images.  jsx-a11y/alt-text
+
+./src/app/order-success/page.tsx
+4:45  Warning: 'ShoppingBag' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/orders/page.tsx
+4:53  Warning: 'MapPin' is defined but never used.  @typescript-eslint/no-unused-vars
+4:68  Warning: 'ChevronRight' is defined but never used.  @typescript-eslint/no-unused-vars
+14:25  Warning: 'setSelectedOrder' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/orders/track/[id]/page.tsx
+7:25  Warning: 'MapPin' is defined but never used.  @typescript-eslint/no-unused-vars
+7:33  Warning: 'Clock' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/product/[id]/page.tsx
+4:82  Warning: 'History' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/profile/addresses/page.tsx
+7:10  Warning: 'motion' is defined but never used.  @typescript-eslint/no-unused-vars
+7:18  Warning: 'AnimatePresence' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/profile/become-seller/page.tsx
+5:23  Warning: 'Flower' is defined but never used.  @typescript-eslint/no-unused-vars
+6:10  Warning: 'motion' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/profile/help/page.tsx
+5:29  Warning: 'Info' is defined but never used.  @typescript-eslint/no-unused-vars
+5:35  Warning: 'HelpCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+6:10  Warning: 'cn' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/profile/privacy/page.tsx
+5:47  Warning: 'FileText' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/support/page.tsx
+5:42  Warning: 'HandHeart' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/vendor-info/page.tsx
+5:81  Warning: 'CheckCircle2' is defined but never used.  @typescript-eslint/no-unused-vars
+6:10  Warning: 'motion' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/Onboarding.tsx
+5:38  Warning: 'ShoppingBag' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/lib/firebase.ts
+2:85  Warning: 'getDocs' is defined but never used.  @typescript-eslint/no-unused-vars
+3:88  Warning: 'onAuthStateChanged' is defined but never used.  @typescript-eslint/no-unused-vars
+3:108  Warning: 'updateProfile' is defined but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/24) ...
+Error occurred prerendering page "/_not-found". Read more: https://nextjs.org/docs/messages/prerender-error
+FirebaseError: Firebase: Error (auth/invalid-api-key).
+    at m (/app/.next/server/chunks/69.js:5:79964)
+    at g (/app/.next/server/chunks/69.js:5:80012)
+    at i.instanceFactory (/app/.next/server/chunks/69.js:5:133812)
+    at a.getOrInitializeService (/app/.next/server/chunks/69.js:5:65220)
+    at a.initialize (/app/.next/server/chunks/69.js:5:64628)
+    at /app/.next/server/chunks/69.js:5:131878
+    at e3 (/app/.next/server/chunks/69.js:5:131907)
+    at 77141 (/app/.next/server/chunks/26.js:1:9085)
+    at t (/app/.next/server/webpack-runtime.js:1:128)
+    at 97366 (/app/.next/server/chunks/26.js:1:4876)
+Export encountered an error on /_not-found/page: /_not-found, exiting the build.
+ ⨯ Static worker exited with code: 1 and signal: null
