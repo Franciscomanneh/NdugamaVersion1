@@ -1,0 +1,3 @@
+## 2025-05-15 - Next.js Image fill and Link Hit Area
+**Learning:** Using the `fill` prop on Next.js `<Image />` component sets its position to `absolute`. When such an image is the primary child of a `<Link>` or other wrapper that doesn't have defined dimensions, the wrapper collapses to a height of 0, making the link unclickable in the browser.
+**Action:** Always ensure that any parent container of an `<Image fill />` component (especially `<Link>` tags) has `relative` positioning and explicit or inherited dimensions (e.g., `block relative h-full`) to maintain the expected layout and interactive hit area.
