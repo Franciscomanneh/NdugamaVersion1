@@ -1,0 +1,3 @@
+## 2025-05-15 - Context Provider Memoization
+**Learning:** In large applications using a global `AppContext`, failing to memoize the provider's value object and its exported functions leads to massive re-render cascades. Components using `useAppContext` re-render every time *any* state in the context changes, even if they don't use that specific state, because the `value` object reference is new on every render.
+**Action:** Always wrap the Context Provider's value in `useMemo`. Ensure all functions passed through context are wrapped in `useCallback` using functional state updates (e.g., `setState(prev => ...)`) to maintain stable references and keep dependency arrays minimal.
