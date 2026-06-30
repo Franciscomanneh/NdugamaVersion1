@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Search, ChevronRight, Plus, MapPin, Heart } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { motion } from 'framer-motion';
@@ -14,14 +15,16 @@ export default function HomePage() {
 
   const locations = ['Banjul', 'Serrekunda', 'Brikama', 'Bakau'];
 
-  const filteredBundles = bundles.filter(b =>
+  const filteredBundles = useMemo(() => bundles.filter(b =>
     b.bundleName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [bundles, searchQuery]);
 
-  const filteredProducts = products.filter(p =>
+  const filteredProducts = useMemo(() => products.filter(p =>
     p.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [products, searchQuery]);
+
+  const featuredSellers = useMemo(() => sellers.filter(s => s.featuredStatus).slice(0, 4), [sellers]);
 
   const categories = [
     { id: '1', name: 'Vegetables', icon: '🥕' },
@@ -76,9 +79,11 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           className="relative h-[200px] w-full rounded-3xl overflow-hidden bg-gray-900 group shadow-lg"
         >
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&q=80&w=800"
             alt="Gambian Market"
+            fill
+            priority
             className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute inset-0 flex flex-col justify-end p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
@@ -129,7 +134,7 @@ export default function HomePage() {
           <h3 className="text-lg font-bold">Featured Gardeners</h3>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-4">
-          {sellers.filter(s => s.featuredStatus).slice(0, 4).map((s) => (
+          {featuredSellers.map((s) => (
             <Link
               href={`/gardener/${s.id}`}
               key={s.id}
