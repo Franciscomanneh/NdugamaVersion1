@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, MapPin, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
@@ -11,8 +11,8 @@ export default function GardenersPage() {
   const router = useRouter();
   const { sellers, loading } = useAppContext();
 
-  const featured = sellers.filter(g => g.featuredStatus).slice(0, 10);
-  const nonFeatured = sellers.filter(g => !g.featuredStatus).slice(0, 5);
+  const featured = useMemo(() => sellers.filter(g => g.featuredStatus).slice(0, 10), [sellers]);
+  const nonFeatured = useMemo(() => sellers.filter(g => !g.featuredStatus).slice(0, 5), [sellers]);
 
   if (loading) return null;
 

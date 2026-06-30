@@ -1,0 +1,345 @@
+
+> tmp-app@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.1.0
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.0.2:3000
+
+ ✓ Starting...
+ ✓ Ready in 1886ms
+ ○ Compiling / ...
+ ✓ Compiled / in 18s (1699 modules)
+ ⨯ Error [FirebaseError]: Firebase: Error (auth/invalid-api-key).
+    at app (src/lib/firebase.ts:17:21)
+    at (ssr)/./src/lib/firebase.ts (.next/server/app/page.js:368:1)
+    at __webpack_require__ (.next/server/webpack-runtime.js:33:43)
+    at eval (webpack-internal:///(ssr)/./src/context/AppContext.tsx:10:71)
+    at (ssr)/./src/context/AppContext.tsx (.next/server/app/page.js:357:1)
+    at Object.__webpack_require__ [as require] (.next/server/webpack-runtime.js:33:43)
+  15 | const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  16 | const db = getFirestore(app);
+> 17 | const auth = getAuth(app);
+     |                     ^
+  18 | const storage = getStorage(app);
+  19 |
+  20 | export { db, auth, storage }; {
+  code: 'auth/invalid-api-key',
+  customData: [Object],
+  digest: '4100566267'
+}
+ GET / 500 in 20249ms
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+ ⨯ Error [FirebaseError]: Firebase: Error (auth/invalid-api-key).
+    at app (src/lib/firebase.ts:17:21)
+    at (ssr)/./src/lib/firebase.ts (.next/server/app/page.js:368:1)
+    at __webpack_require__ (.next/server/webpack-runtime.js:33:43)
+    at eval (webpack-internal:///(ssr)/./src/context/AppContext.tsx:10:71)
+    at (ssr)/./src/context/AppContext.tsx (.next/server/app/page.js:357:1)
+    at Object.__webpack_require__ [as require] (.next/server/webpack-runtime.js:33:43)
+  15 | const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  16 | const db = getFirestore(app);
+> 17 | const auth = getAuth(app);
+     |                     ^
+  18 | const storage = getStorage(app);
+  19 |
+  20 | export { db, auth, storage }; {
+  code: 'auth/invalid-api-key',
+  customData: [Object],
+  digest: '4100566267'
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+ GET / 500 in 1766ms
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+ ✓ Compiled in 621ms (769 modules)
+ ⨯ Error [FirebaseError]: Firebase: Error (auth/invalid-api-key).
+    at app (src/lib/firebase.ts:17:21)
+    at (ssr)/./src/lib/firebase.ts (.next/server/app/page.js:368:1)
+    at __webpack_require__ (.next/server/webpack-runtime.js:33:43)
+    at eval (webpack-internal:///(ssr)/./src/context/AppContext.tsx:10:71)
+    at (ssr)/./src/context/AppContext.tsx (.next/server/app/page.js:357:1)
+    at Object.__webpack_require__ [as require] (.next/server/webpack-runtime.js:33:43)
+  15 | const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  16 | const db = getFirestore(app);
+> 17 | const auth = getAuth(app);
+     |                     ^
+  18 | const storage = getStorage(app);
+  19 |
+  20 | export { db, auth, storage }; {
+  code: 'auth/invalid-api-key',
+  customData: [Object],
+  digest: '4100566267'
+}
+ GET / 500 in 552ms
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+ ⨯ Error [FirebaseError]: Firebase: Error (auth/invalid-api-key).
+    at app (src/lib/firebase.ts:17:21)
+    at (ssr)/./src/lib/firebase.ts (.next/server/app/page.js:368:1)
+    at __webpack_require__ (.next/server/webpack-runtime.js:33:43)
+    at eval (webpack-internal:///(ssr)/./src/context/AppContext.tsx:10:71)
+    at (ssr)/./src/context/AppContext.tsx (.next/server/app/page.js:357:1)
+    at Object.__webpack_require__ [as require] (.next/server/webpack-runtime.js:33:43)
+  15 | const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  16 | const db = getFirestore(app);
+> 17 | const auth = getAuth(app);
+     |                     ^
+  18 | const storage = getStorage(app);
+  19 |
+  20 | export { db, auth, storage }; {
+  code: 'auth/invalid-api-key',
+  customData: [Object],
+  digest: '4100566267'
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+ GET / 500 in 1354ms
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}
+Failed to get source map: [Error: Failed to parse source map /app/.next/static/chunks/app/LayoutGroupContext.mjs.map.] {
+  [cause]: [Error: ENOENT: no such file or directory, open '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'] {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/app/.next/static/chunks/app/LayoutGroupContext.mjs.map'
+  }
+}

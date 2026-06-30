@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { firebaseService, auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
@@ -124,7 +124,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [location, setLocation] = useState('Serrekunda');
+  const [location, setLocationState] = useState('Serrekunda');
   const [favorites, setFavorites] = useState<string[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [bundles, setBundles] = useState<Bundle[]>([]);
@@ -243,7 +243,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (savedCart) setCart(JSON.parse(savedCart));
     if (savedFavorites) setFavorites(JSON.parse(savedFavorites));
-    if (savedLocation) setLocation(savedLocation);
+    if (savedLocation) setLocationState(savedLocation);
   }, []);
 
   useEffect(() => {
@@ -258,11 +258,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('dugama_location', location);
   }, [location]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await firebaseService.logoutUser();
-  };
+  }, []);
 
-  const addToCart = (item: any, type: 'product' | 'bundle', quantity: number = 1, customizedIngredients?: any[]) => {
+  const addToCart = useCallback((item: any, type: 'product' | 'bundle', quantity: number = 1, customizedIngredients?: any[]) => {
     setCart(prev => {
       if (type === 'product') {
         const existing = prev.find(i => i.id === item.id && i.type === 'product');
@@ -280,13 +280,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ingredients: customizedIngredients
       }];
     });
-  };
+  }, []);
 
-  const removeFromCart = (id: string) => {
+  const removeFromCart = useCallback((id: string) => {
     setCart(prev => prev.filter(i => i.id !== id));
-  };
+  }, []);
 
-  const updateQuantity = (id: string, delta: number) => {
+  const updateQuantity = useCallback((id: string, delta: number) => {
     setCart(prev => prev.map(i => {
       if (i.id === id) {
         const newQty = Math.max(1, i.quantity + delta);
@@ -294,43 +294,56 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return i;
     }));
-  };
+  }, []);
 
-  const clearCart = () => setCart([]);
+  const clearCart = useCallback(() => setCart([]), []);
 
-  const addOrder = async (orderData: any) => {
+  const setLocation = useCallback((loc: string) => setLocationState(loc), []);
+
+  const addOrder = useCallback(async (orderData: any) => {
     await firebaseService.createOrder(orderData);
-  };
+  }, []);
 
-  const updateOrderStatus = async (id: string, status: string) => {
+  const updateOrderStatus = useCallback(async (id: string, status: string) => {
     await firebaseService.updateOrderStatus(id, status);
-  };
+  }, []);
 
-  const markOrderCompleted = async (id: string) => {
+  const markOrderCompleted = useCallback(async (id: string) => {
     await firebaseService.updateOrderStatus(id, "Delivered Successfully");
-  };
+  }, []);
 
-  const toggleFavorite = (id: string) => {
+  const toggleFavorite = useCallback((id: string) => {
     setFavorites(prev => prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]);
-  };
+  }, []);
 
-  const addAddress = (addr: Address) => setAddresses(prev => [...prev, addr]);
+  const addAddress = useCallback((addr: Address) => setAddresses(prev => [...prev, addr]), []);
 
-  const setDefaultPayment = (id: string) => {
+  const setDefaultPayment = useCallback((id: string) => {
     setPaymentMethods(prev => prev.map(m => ({ ...m, isDefault: m.id === id })));
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    user, loading, isLoggedIn: !!user, logout,
+    cart, addToCart, removeFromCart, updateQuantity, clearCart,
+    location, setLocation,
+    favorites, toggleFavorite,
+    products, bundles, sellers, orders,
+    addOrder, updateOrderStatus, markOrderCompleted,
+    addresses, addAddress,
+    paymentMethods, setDefaultPayment
+  }), [
+    user, loading, logout,
+    cart, addToCart, removeFromCart, updateQuantity, clearCart,
+    location, setLocation,
+    favorites, toggleFavorite,
+    products, bundles, sellers, orders,
+    addOrder, updateOrderStatus, markOrderCompleted,
+    addresses, addAddress,
+    paymentMethods, setDefaultPayment
+  ]);
 
   return (
-    <AppContext.Provider value={{
-      user, loading, isLoggedIn: !!user, logout,
-      cart, addToCart, removeFromCart, updateQuantity, clearCart,
-      location, setLocation,
-      favorites, toggleFavorite,
-      products, bundles, sellers, orders,
-      addOrder, updateOrderStatus, markOrderCompleted,
-      addresses, addAddress,
-      paymentMethods, setDefaultPayment
-    }}>
+    <AppContext.Provider value={value}>
       {children}
     </AppContext.Provider>
   );
