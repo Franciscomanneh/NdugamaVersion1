@@ -1,0 +1,3 @@
+## 2026-07-02 - Global Context and Home Page Optimization
+**Learning:** In a Next.js application with a global state provider (AppContext), failing to memoize the provider value or its functions causes the entire component tree to re-render whenever any state (like a search query or cart update) changes. Additionally, using standard <img> tags instead of Next.js <Image /> components misses out on critical LCP optimizations.
+**Action:** Always wrap global context values in `useMemo` and functions in `useCallback`. Use the functional state update pattern (`setCount(prev => prev + 1)`) to keep `useCallback` dependencies minimal. For above-the-fold content, use Next.js `<Image />` with the `priority` prop to significantly improve LCP.
