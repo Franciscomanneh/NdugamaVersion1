@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Search, ChevronRight, Plus, MapPin, Heart } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { motion } from 'framer-motion';
@@ -14,14 +15,19 @@ export default function HomePage() {
 
   const locations = ['Banjul', 'Serrekunda', 'Brikama', 'Bakau'];
 
-  const filteredBundles = bundles.filter(b =>
+  const filteredBundles = useMemo(() => bundles.filter(b =>
     b.bundleName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [bundles, searchQuery]);
 
-  const filteredProducts = products.filter(p =>
+  const filteredProducts = useMemo(() => products.filter(p =>
     p.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [products, searchQuery]);
+
+  // ⚡ Bolt: Memoize featured sellers to avoid filtering on every render
+  const featuredGardeners = useMemo(() =>
+    sellers.filter(s => s.featuredStatus).slice(0, 4)
+  , [sellers]);
 
   const categories = [
     { id: '1', name: 'Vegetables', icon: '🥕' },
@@ -76,10 +82,12 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           className="relative h-[200px] w-full rounded-3xl overflow-hidden bg-gray-900 group shadow-lg"
         >
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&q=80&w=800"
             alt="Gambian Market"
-            className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500"
+            fill
+            priority
+            className="object-cover opacity-70 group-hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute inset-0 flex flex-col justify-end p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
             <h2 className="text-white text-2xl font-bold leading-tight">
@@ -129,13 +137,20 @@ export default function HomePage() {
           <h3 className="text-lg font-bold">Featured Gardeners</h3>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-4">
-          {sellers.filter(s => s.featuredStatus).slice(0, 4).map((s) => (
+          {featuredGardeners.map((s) => (
             <Link
               href={`/gardener/${s.id}`}
               key={s.id}
               className="p-3 rounded-2xl bg-white border border-gray-100 shadow-soft active:scale-[0.98] transition-transform"
             >
-              <img src={s.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"} alt={s.name} className="w-full h-24 object-cover rounded-xl mb-3" />
+              <div className="relative w-full h-24 mb-3 rounded-xl overflow-hidden">
+                <Image
+                  src={s.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"}
+                  alt={s.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
               <h4 className="font-bold text-sm truncate">{s.name}</h4>
               <p className="text-[10px] text-gray-500 mb-2 flex items-center gap-1">
                 <MapPin size={10} /> {s.location}
@@ -172,8 +187,13 @@ export default function HomePage() {
         <div className="flex gap-4 overflow-x-auto px-6 hide-scrollbar pb-4">
           {filteredBundles.map((bundle) => (
             <div key={bundle.id} className="min-w-[280px] rounded-3xl overflow-hidden bg-white border border-gray-100 shadow-soft relative group">
-              <Link href={`/bundle/${bundle.id}`}>
-                <img src={bundle.bundleImage} alt={bundle.bundleName} className="w-full h-40 object-cover" />
+              <Link href={`/bundle/${bundle.id}`} className="block relative h-40 w-full">
+                <Image
+                  src={bundle.bundleImage}
+                  alt={bundle.bundleName}
+                  fill
+                  className="object-cover"
+                />
               </Link>
               <div className="p-4">
                 <Link href={`/bundle/${bundle.id}`}>
@@ -214,8 +234,13 @@ export default function HomePage() {
           {(searchQuery ? filteredProducts : filteredProducts.slice(0, 4)).map((p) => (
             <div key={p.id} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-soft group">
               <div className="relative h-32 w-full overflow-hidden">
-                <Link href={`/product/${p.id}`}>
-                  <img src={p.imageUrl} alt={p.productName} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                <Link href={`/product/${p.id}`} className="block relative w-full h-full">
+                  <Image
+                    src={p.imageUrl}
+                    alt={p.productName}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform"
+                  />
                 </Link>
                 <button
                   onClick={() => toggleFavorite(p.id)}
