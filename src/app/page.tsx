@@ -1,35 +1,45 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Search, ChevronRight, Plus, MapPin, Heart } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { motion } from 'framer-motion';
 import { DonationModal } from '@/components/DonationModal';
+
+const LOCATIONS = ['Banjul', 'Serrekunda', 'Brikama', 'Bakau'];
+const CATEGORIES = [
+  { id: '1', name: 'Vegetables', icon: '🥕' },
+  { id: '2', name: 'Fruits', icon: '🍎' },
+  { id: '3', name: 'Fish', icon: '🐟' },
+  { id: '4', name: 'Spices', icon: '🌶️' },
+  { id: '5', name: 'Bread', icon: '🥖' },
+];
 
 export default function HomePage() {
   const { location, setLocation, addToCart, favorites, toggleFavorite, products, bundles, sellers } = useAppContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
 
-  const locations = ['Banjul', 'Serrekunda', 'Brikama', 'Bakau'];
+  const filteredBundles = useMemo(() => {
+    const lowerQuery = searchQuery.toLowerCase();
+    return bundles.filter(b =>
+      b.bundleName.toLowerCase().includes(lowerQuery)
+    );
+  }, [bundles, searchQuery]);
 
-  const filteredBundles = bundles.filter(b =>
-    b.bundleName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProducts = useMemo(() => {
+    const lowerQuery = searchQuery.toLowerCase();
+    return products.filter(p =>
+      p.productName.toLowerCase().includes(lowerQuery) ||
+      p.category.toLowerCase().includes(lowerQuery)
+    );
+  }, [products, searchQuery]);
 
-  const filteredProducts = products.filter(p =>
-    p.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const categories = [
-    { id: '1', name: 'Vegetables', icon: '🥕' },
-    { id: '2', name: 'Fruits', icon: '🍎' },
-    { id: '3', name: 'Fish', icon: '🐟' },
-    { id: '4', name: 'Spices', icon: '🌶️' },
-    { id: '5', name: 'Bread', icon: '🥖' },
-  ];
+  const featuredSellers = useMemo(() =>
+    sellers.filter(s => s.featuredStatus).slice(0, 4)
+  , [sellers]);
 
   return (
     <div className="flex flex-col gap-8 pb-10">
@@ -62,7 +72,7 @@ export default function HomePage() {
             className="bg-transparent text-[9px] font-black focus:outline-none appearance-none pr-3 cursor-pointer truncate uppercase tracking-tight"
             style={{ backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%228%22%20height%3D%228%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right center' }}
           >
-            {locations.map(loc => (
+            {LOCATIONS.map(loc => (
               <option key={loc} value={loc}>{loc}</option>
             ))}
           </select>
@@ -76,10 +86,13 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           className="relative h-[200px] w-full rounded-3xl overflow-hidden bg-gray-900 group shadow-lg"
         >
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&q=80&w=800"
             alt="Gambian Market"
-            className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500"
+            fill
+            priority
+            className="object-cover opacity-70 group-hover:scale-105 transition-transform duration-500"
+            sizes="(max-width: 768px) 100vw, 800px"
           />
           <div className="absolute inset-0 flex flex-col justify-end p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
             <h2 className="text-white text-2xl font-bold leading-tight">
@@ -107,7 +120,7 @@ export default function HomePage() {
             <h3 className="text-lg font-bold">Categories</h3>
           </div>
           <div className="flex gap-4 overflow-x-auto px-6 hide-scrollbar pb-2">
-            {categories.map((cat) => (
+            {CATEGORIES.map((cat) => (
               <Link
                 key={cat.id}
                 href={`/market?category=${cat.name}`}
@@ -129,13 +142,21 @@ export default function HomePage() {
           <h3 className="text-lg font-bold">Featured Gardeners</h3>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-4">
-          {sellers.filter(s => s.featuredStatus).slice(0, 4).map((s) => (
+          {featuredSellers.map((s) => (
             <Link
               href={`/gardener/${s.id}`}
               key={s.id}
-              className="p-3 rounded-2xl bg-white border border-gray-100 shadow-soft active:scale-[0.98] transition-transform"
+              className="p-3 rounded-2xl bg-white border border-gray-100 shadow-soft active:scale-[0.98] transition-transform block relative"
             >
-              <img src={s.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"} alt={s.name} className="w-full h-24 object-cover rounded-xl mb-3" />
+              <div className="relative w-full h-24 mb-3 rounded-xl overflow-hidden">
+                <Image
+                  src={s.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"}
+                  alt={s.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 200px"
+                />
+              </div>
               <h4 className="font-bold text-sm truncate">{s.name}</h4>
               <p className="text-[10px] text-gray-500 mb-2 flex items-center gap-1">
                 <MapPin size={10} /> {s.location}
@@ -172,8 +193,14 @@ export default function HomePage() {
         <div className="flex gap-4 overflow-x-auto px-6 hide-scrollbar pb-4">
           {filteredBundles.map((bundle) => (
             <div key={bundle.id} className="min-w-[280px] rounded-3xl overflow-hidden bg-white border border-gray-100 shadow-soft relative group">
-              <Link href={`/bundle/${bundle.id}`}>
-                <img src={bundle.bundleImage} alt={bundle.bundleName} className="w-full h-40 object-cover" />
+              <Link href={`/bundle/${bundle.id}`} className="block relative h-40">
+                <Image
+                  src={bundle.bundleImage}
+                  alt={bundle.bundleName}
+                  fill
+                  className="object-cover"
+                  sizes="280px"
+                />
               </Link>
               <div className="p-4">
                 <Link href={`/bundle/${bundle.id}`}>
@@ -214,8 +241,14 @@ export default function HomePage() {
           {(searchQuery ? filteredProducts : filteredProducts.slice(0, 4)).map((p) => (
             <div key={p.id} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-soft group">
               <div className="relative h-32 w-full overflow-hidden">
-                <Link href={`/product/${p.id}`}>
-                  <img src={p.imageUrl} alt={p.productName} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                <Link href={`/product/${p.id}`} className="block relative h-full">
+                  <Image
+                    src={p.imageUrl}
+                    alt={p.productName}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform"
+                    sizes="(max-width: 768px) 50vw, 200px"
+                  />
                 </Link>
                 <button
                   onClick={() => toggleFavorite(p.id)}
